@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TexN - Node Editor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #1a1a1a;
+            color: #ccc;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            height: 100vh;
+        }
+        
+        /* Top Menu Bar */
+        .top-menu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: #2a2a2a;
+            border-bottom: 1px solid #444;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            gap: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+            z-index: 1000;
+        }
+        
+        .menu-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .menu-label {
+            font-size: 10px;
+            color: #888;
+            font-weight: 500;
+        }
+        
+        /* Marking Menu Button */
+        .marking-menu-btn {
+            background: #333;
+            border: 1px solid #555;
+            border-radius: 0px;
+            color: #ccc;
+            padding: 6px 12px;
+            font-size: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        
+        .marking-menu-btn:hover {
+            background: #444;
+            border-color: #666;
+        }
+        
+        /* Radial Marking Menu */
+        .radial-menu {
+            position: absolute;
+            top: 45px;
+            left: 15px;
+            width: 200px;
+            height: 200px;
+            background: #2a2a2a;
+            border: 1px solid #555;
+            border-radius: 0px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+            display: none;
+            z-index: 1001;
+        }
+        
+        .radial-menu.active {
+            display: block;
+        }
+        
+        .radial-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50px;
+            height: 50px;
+            background: #333;
+            border: 2px solid #666;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: #ccc;
+            cursor: pointer;
+        }
+        
+        .radial-item {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border: 1px solid #666;
+            border-radius: 0px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: bold;
+        }
+        
+        .radial-item:hover {
+            transform: scale(1.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+        }
+        
+        .radial-item.gn { background: #4CAF50; }
+        .radial-item.cn { background: #2196F3; }
+        .radial-item.mn { background: #FF9800; }
+        .radial-item.un { background: #9C27B0; }
+        .radial-item.dn { background: #F44336; }
+        
+        /* Compact Toolbar */
+        .compact-toolbar {
+            display: flex;
+            gap: 2px;
+            background: #333;
+            border: 1px solid #555;
+            border-radius: 0px;
+            padding: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .toolbar-item {
+            width: 28px;
+            height: 28px;
+            border: 1px solid #666;
+            border-radius: 0px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: bold;
+        }
+        
+        .toolbar-item:hover {
+            background: #555;
+            transform: scale(1.05);
+        }
+        
+        .toolbar-item.gn { background: #4CAF50; }
+        .toolbar-item.cn { background: #2196F3; }
+        .toolbar-item.mn { background: #FF9800; }
+        .toolbar-item.un { background: #9C27B0; }
+        .toolbar-item.dn { background: #F44336; }
+        
+        /* Right-Click Marking Menu */
+        .right-click-menu {
+            position: fixed;
+            width: 300px;
+            height: 300px;
+            background: #2a2a2a;
+            border: 2px solid #666;
+            border-radius: 0px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
+            display: none;
+            z-index: 2000;
+            pointer-events: none;
+        }
+        
+        .right-click-menu.active {
+            display: block;
+            pointer-events: all;
+        }
+        
+        .marking-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            background: #333;
+            border: 3px solid #888;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #ccc;
+            font-weight: bold;
+        }
+        
+        .marking-item {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            border: 2px solid #666;
+            border-radius: 0px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            font-weight: bold;
+            text-align: center;
+            line-height: 1.2;
+        }
+        
+        .marking-item:hover {
+            transform: scale(1.15);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+            border-color: #fff;
+        }
+        
+        .marking-item.selected {
+            transform: scale(1.2);
+            border-color: #00ffff;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
+        }
+        
+        .marking-item.gn { background: #4CAF50; }
+        .marking-item.cn { background: #2196F3; }
+        .marking-item.mn { background: #FF9800; }
+        .marking-item.un { background: #9C27B0; }
+        .marking-item.dn { background: #F44336; }
+        
+        /* Marking Menu Labels */
+        .marking-label {
+            position: absolute;
+            background: #333;
+            border: 1px solid #555;
+            border-radius: 0px;
+            padding: 4px 8px;
+            font-size: 10px;
+            color: #ccc;
+            white-space: nowrap;
+            pointer-events: none;
+            z-index: 2001;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+        }
+        
+        /* Sample Nodes */
+        .sample-node {
+            position: absolute;
+            width: 120px;
+            height: 80px;
+            background: #333;
+            border: 2px solid #666;
+            border-radius: 0px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: move;
+            user-select: none;
+            z-index: 100;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+        }
+        
+        .sample-node.selected {
+            border-color: #00ffff;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+        }
+        
+        .sample-node.gn { background: #4CAF50; }
+        .sample-node.cn { background: #2196F3; }
+        .sample-node.mn { background: #FF9800; }
+        .sample-node.un { background: #9C27B0; }
+        .sample-node.dn { background: #F44336; }
+        
+        .node-title {
+            font-size: 12px;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+        
+        .node-type {
+            font-size: 9px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        /* Color Controls Panel */
+        .color-panel {
+            position: fixed;
+            top: 50px;
+            right: 15px;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 0px;
+            padding: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+            z-index: 999;
+        }
+        
+        .color-controls-container {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 7px;
+            padding: 5px 8px;
+            max-height: 60px;
+            align-items: center;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+        }
+        
+        .category-colors {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .category-list {
+            display: flex;
+            gap: 2px;
+        }
+        
+        .category-item {
+            display: flex;
+            align-items: center;
+            gap: 1px;
+        }
+        
+        .category-label {
+            font-size: 5px;
+            color: #666;
+            font-weight: 400;
+            min-width: 10px;
+            text-align: center;
+            margin-left: 2px;
+        }
+        
+        .category-color-picker {
+            width: 21px;
+            height: 15px;
+            border: 1px solid #555;
+            border-radius: 0px;
+            cursor: pointer;
+            background: transparent;
+            padding: 0;
+        }
+        
+        .category-color-picker::-webkit-color-swatch-wrapper {
+            padding: 2px;
+        }
+        
+        .category-color-picker::-webkit-color-swatch {
+            border: none;
+            border-radius: 0px;
+        }
+        
+        /* Saturation Control */
+        .saturation-control {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+        
+        .saturation-slider {
+            width: 45px;
+            height: 3px;
+            background: linear-gradient(to right, #666, #ff0000);
+            border-radius: 0px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .saturation-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 10px;
+            height: 10px;
+            background: #fff;
+            border-radius: 0px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+            transition: all 0.2s ease;
+        }
+        
+        .saturation-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+        }
+        
+        /* Reset Button */
+        .color-reset {
+            background: none;
+            border: 1px solid #555;
+            color: #ccc;
+            padding: 3px 6px;
+            border-radius: 0px;
+            cursor: pointer;
+            font-size: 7px;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        
+        .color-reset:hover {
+            border-color: #00ffff;
+            color: #00ffff;
+        }
+        
+        /* Canvas Area */
+        .canvas-area {
+            position: fixed;
+            top: 50px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #1a1a1a;
+            cursor: crosshair;
+        }
+        
+        .canvas-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        
+        /* Status Bar */
+        .status-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 25px;
+            background: #2a2a2a;
+            border-top: 1px solid #444;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            font-size: 10px;
+            color: #888;
+            z-index: 999;
+        }
+        
+        .status-left {
+            flex: 1;
+        }
+        
+        .status-right {
+            display: flex;
+            gap: 20px;
+        }
+        
+        /* Tooltips */
+        .tooltip {
+            position: absolute;
+            background: #333;
+            border: 1px solid #555;
+            border-radius: 0px;
+            padding: 6px 10px;
+            font-size: 10px;
+            color: #ccc;
+            pointer-events: none;
+            z-index: 1002;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+            display: none;
+        }
+        
+        /* Hotkey Hints */
+        .hotkey-hint {
+            position: fixed;
+            top: 60px;
+            left: 15px;
+            background: #333;
+            border: 1px solid #555;
+            border-radius: 0px;
+            padding: 8px;
+            font-size: 9px;
+            color: #aaa;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+            z-index: 998;
+        }
+        
+        .hotkey-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 2px 0;
+        }
+        
+        .hotkey-key {
+            background: #555;
+            padding: 2px 4px;
+            border-radius: 2px;
+            font-family: monospace;
+            font-size: 8px;
+            min-width: 12px;
+            text-align: center;
+        }
+        
+        /* Palette Selector */
+        .palette-selector {
+            background: #333;
+            border: 1px solid #555;
+            border-radius: 0px;
+            color: #ccc;
+            padding: 4px 8px;
+            font-size: 9px;
+            cursor: pointer;
+        }
+        
+        .palette-selector:focus {
+            outline: none;
+            border-color: #00ffff;
+        }
+        
+        /* Interaction Colors */
+        .interaction-colors {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .interaction-item {
+            display: flex;
+            align-items: center;
+            gap: 1px;
+        }
+        
+        /* Physics Panel */
+        .physics-panel {
+            position: fixed;
+            top: 50px;
+            left: 15px;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 0px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+            z-index: 999;
+            min-width: 200px;
+            display: none;
+        }
+        
+        .physics-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            border-bottom: 1px solid #555;
+            background: #333;
+        }
+        
+        .physics-title {
+            font-size: 10px;
+            font-weight: bold;
+            color: #ccc;
+        }
+        
+        .physics-toggle {
+            background: none;
+            border: none;
+            color: #ccc;
+            cursor: pointer;
+            font-size: 12px;
+            padding: 2px;
+        }
+        
+        .physics-controls-container {
+            padding: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .physics-control {
+            margin-bottom: 8px;
+        }
+        
+        .physics-control label {
+            display: block;
+            font-size: 9px;
+            color: #aaa;
+            margin-bottom: 4px;
+        }
+        
+        .physics-control input[type="range"] {
+            width: 100%;
+            height: 3px;
+            background: #555;
+            border-radius: 0px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .physics-control input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 8px;
+            height: 8px;
+            background: #fff;
+            border-radius: 0px;
+            cursor: pointer;
+        }
+        
+        .physics-value {
+            font-size: 8px;
+            color: #888;
+            text-align: right;
+            margin-top: 2px;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .physics-panel {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 800px) {
+            .color-panel {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Menu Bar -->
+    <div class="top-menu">
+        <div class="menu-section">
+            <span class="menu-label">Categories:</span>
+            <button class="marking-menu-btn" id="markingMenuBtn">🎨 Marking Menu</button>
+            <div class="compact-toolbar">
+                <div class="toolbar-item gn" title="Generators (G)">G</div>
+                <div class="toolbar-item cn" title="Constants (C)">C</div>
+                <div class="toolbar-item mn" title="Math (M)">M</div>
+                <div class="toolbar-item un" title="Utility (U)">U</div>
+                <div class="toolbar-item dn" title="Deform (D)">D</div>
+            </div>
+        </div>
+        
+        <div class="menu-section">
+            <span class="menu-label">Palette:</span>
+            <select class="palette-selector" id="paletteSelector">
+                <option value="material">Material Design</option>
+                <option value="tailwind">Tailwind Modern</option>
+                <option value="github">GitHub Dark</option>
+                <option value="notion">Notion Workspace</option>
+                <option value="figma">Figma Design</option>
+                <option value="apple">Apple HIG</option>
+                <option value="carbon">IBM Carbon</option>
+                <option value="ant">Ant Design</option>
+                <option value="slack">Slack Brand</option>
+                <option value="stripe">Stripe Clean</option>
+                <option value="vercel">Vercel Mono</option>
+                <option value="atlassian">Atlassian Suite</option>
+            </select>
+        </div>
+        
+        <div class="menu-section">
+            <span class="menu-label">Tools:</span>
+            <button class="marking-menu-btn" style="font-size: 9px;">🔧</button>
+            <button class="marking-menu-btn" style="font-size: 9px;">📊</button>
+            <button class="marking-menu-btn" style="font-size: 9px;">⚙️</button>
+        </div>
+    </div>
+    
+    <!-- Radial Marking Menu -->
+    <div class="radial-menu" id="radialMenu">
+        <div class="radial-center">+</div>
+        <div class="radial-item gn" style="top: 20px; left: 50%; transform: translateX(-50%);" title="Generators">GN</div>
+        <div class="radial-item cn" style="top: 50%; right: 20px; transform: translateY(-50%);" title="Constants">CN</div>
+        <div class="radial-item mn" style="bottom: 20px; left: 50%; transform: translateX(-50%);" title="Math">MN</div>
+        <div class="radial-item un" style="top: 50%; left: 20px; transform: translateY(-50%);" title="Utility">UN</div>
+        <div class="radial-item dn" style="top: 35%; left: 35%; transform: translate(-50%, -50%);" title="Deform">DN</div>
+    </div>
+    
+    <!-- Right-Click Marking Menu -->
+    <div class="right-click-menu" id="rightClickMenu">
+        <div class="marking-center">+</div>
+        <div class="marking-item gn" style="top: 30px; left: 50%; transform: translateX(-50%);" data-category="GN" data-name="Noise">Noise</div>
+        <div class="marking-item cn" style="top: 50%; right: 30px; transform: translateY(-50%);" data-category="CN" data-name="Color">Color</div>
+        <div class="marking-item mn" style="bottom: 30px; left: 50%; transform: translateX(-50%);" data-category="MN" data-name="Add">Add</div>
+        <div class="marking-item un" style="top: 50%; left: 30px; transform: translateY(-50%);" data-category="UN" data-name="Blend">Blend</div>
+        <div class="marking-item dn" style="top: 25%; left: 25%; transform: translate(-50%, -50%);" data-category="DN" data-name="Warp">Warp</div>
+    </div>
+    
+    <!-- Color Controls Panel -->
+    <div class="color-panel">
+        <div class="color-controls-container">
+            <div class="category-colors">
+                <div class="category-list">
+                    <div class="category-item" data-category="GN">
+                        <input type="color" class="category-color-picker" id="colorGN" value="#4CAF50" title="Generators">
+                        <span class="category-label">GN</span>
+                    </div>
+                    <div class="category-item" data-category="CN">
+                        <input type="color" class="category-color-picker" id="colorCN" value="#2196F3" title="Constants">
+                        <span class="category-label">CN</span>
+                    </div>
+                    <div class="category-item" data-category="MN">
+                        <input type="color" class="category-color-picker" id="colorMN" value="#FF9800" title="Math">
+                        <span class="category-label">MN</span>
+                    </div>
+                    <div class="category-item" data-category="UN">
+                        <input type="color" class="category-color-picker" id="colorUN" value="#9C27B0" title="Utility">
+                        <span class="category-label">UN</span>
+                    </div>
+                    <div class="category-item" data-category="DN">
+                        <input type="color" class="category-color-picker" id="colorDN" value="#F44336" title="Deform">
+                        <span class="category-label">DN</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="interaction-colors">
+                <div class="interaction-item">
+                    <input type="color" class="category-color-picker" id="colorHover" value="#00FFFF" title="Hover">
+                    <span class="category-label">H</span>
+                </div>
+                <div class="interaction-item">
+                    <input type="color" class="category-color-picker" id="colorSelected" value="#FFFF00" title="Selected">
+                    <span class="category-label">S</span>
+                </div>
+            </div>
+            
+            <div class="saturation-control">
+                <span style="color: #888; font-size: 7px; min-width: 9px;">S:</span>
+                <input type="range" class="saturation-slider" id="saturationSlider" min="0" max="100" value="100">
+                <span id="saturationValue" style="color: #aaa; font-size: 7px; min-width: 22px;">100%</span>
+            </div>
+            
+            <button class="color-reset" id="colorReset">Reset</button>
+        </div>
+    </div>
+    
+    <!-- Physics Panel -->
+    <div class="physics-panel">
+        <div class="physics-header">
+            <span class="physics-title">WIRE PHYSICS</span>
+            <button class="physics-toggle" id="physicsToggle">▼</button>
+        </div>
+        <div class="physics-controls-container" id="physicsControlsContainer">
+            <div class="physics-control">
+                <label>Min Stiffness (Long Wires)</label>
+                <input type="range" id="minStiffnessSlider" min="0.01" max="0.5" step="0.05" value="0.1">
+                <div class="physics-value" id="minStiffnessValue">0.1</div>
+            </div>
+            <div class="physics-control">
+                <label>Max Stiffness (Short Wires)</label>
+                <input type="range" id="maxStiffnessSlider" min="0.5" max="1.0" step="0.05" value="0.8">
+                <div class="physics-value" id="maxStiffnessValue">0.8</div>
+            </div>
+            <div class="physics-control">
+                <label>Stiffness Bias (Gradient Shape)</label>
+                <input type="range" id="stiffnessBiasSlider" min="0.1" max="8.0" step="0.1" value="2.0">
+                <div class="physics-value" id="stiffnessBiasValue">2.0</div>
+            </div>
+            <div class="physics-control">
+                <label>Damping</label>
+                <input type="range" id="dampingSlider" min="0.5" max="0.99" step="0.01" value="0.85">
+                <div class="physics-value" id="dampingValue">0.85</div>
+            </div>
+            <div class="physics-control">
+                <label>Gravity</label>
+                <input type="range" id="gravitySlider" min="0" max="10.0" step="0.1" value="2.5">
+                <div class="physics-value" id="gravityValue">2.5</div>
+            </div>
+            <div class="physics-control">
+                <label>Sag</label>
+                <input type="range" id="sagSlider" min="1" max="200" step="5" value="43">
+                <div class="physics-value" id="sagValue">43</div>
+            </div>
+            <div class="physics-control">
+                <label>Collision Strength</label>
+                <input type="range" id="collisionStrengthSlider" min="0" max="100" step="5" value="50">
+                <div class="physics-value" id="collisionStrengthValue">50</div>
+            </div>
+            <div class="physics-control">
+                <label>Collision Padding</label>
+                <input type="range" id="collisionPaddingSlider" min="0" max="100" step="5" value="20">
+                <div class="physics-value" id="collisionPaddingValue">20</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Hotkey Hints -->
+    <div class="hotkey-hint">
+        <div class="hotkey-item">
+            <span class="hotkey-key">G</span>
+            <span>Generators</span>
+        </div>
+                 <div class="hotkey-item">
+             <span class="hotkey-key">C</span>
+             <span>Toggle Colors</span>
+         </div>
+        <div class="hotkey-item">
+            <span class="hotkey-key">M</span>
+            <span>Math</span>
+        </div>
+        <div class="hotkey-item">
+            <span class="hotkey-key">U</span>
+            <span>Utility</span>
+        </div>
+        <div class="hotkey-item">
+            <span class="hotkey-key">D</span>
+            <span>Deform</span>
+        </div>
+        <div class="hotkey-item">
+            <span class="hotkey-key">R</span>
+            <span>Radial Menu</span>
+        </div>
+        <div class="hotkey-item">
+            <span class="hotkey-key">P</span>
+            <span>Toggle Physics</span>
+        </div>
+        <div class="hotkey-item">
+            <span class="hotkey-key">RMB</span>
+            <span>Marking Menu</span>
+        </div>
+    </div>
+    
+    <!-- Canvas Area -->
+    <div class="canvas-area" id="canvasArea">
+        <div class="canvas-grid"></div>
+        <!-- Sample nodes will be created here -->
+    </div>
+    
+    <!-- Status Bar -->
+    <div class="status-bar">
+        <div class="status-left">
+            Ready - Right-click for marking menu, drag nodes to move
+        </div>
+        <div class="status-right">
+            <span>Zoom: 100%</span>
+            <span>Position: 0, 0</span>
+            <span>Selected: 0 nodes</span>
+        </div>
+    </div>
+    
+    <!-- Tooltip -->
+    <div class="tooltip" id="tooltip"></div>
+    
+    <script>
+        // Marking Menu System
+        class MarkingMenu {
+            constructor() {
+                this.menu = document.getElementById('rightClickMenu');
+                this.canvas = document.getElementById('canvasArea');
+                this.isActive = false;
+                this.startPos = { x: 0, y: 0 };
+                this.currentSelection = null;
+                this.dragThreshold = 10;
+                this.isDragging = false;
+                
+                this.setupEventListeners();
+            }
+            
+            setupEventListeners() {
+                // Right-click to open menu
+                this.canvas.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    this.openMenu(e.clientX, e.clientY);
+                });
+                
+                // Mouse move for selection
+                this.canvas.addEventListener('mousemove', (e) => {
+                    if (this.isActive) {
+                        this.handleMouseMove(e);
+                    }
+                });
+                
+                // Mouse up to select
+                this.canvas.addEventListener('mouseup', (e) => {
+                    if (this.isActive) {
+                        this.handleMouseUp(e);
+                    }
+                });
+                
+                // Escape to cancel
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && this.isActive) {
+                        this.closeMenu();
+                    }
+                });
+                
+                // Click outside to close
+                document.addEventListener('click', (e) => {
+                    if (this.isActive && !this.menu.contains(e.target)) {
+                        this.closeMenu();
+                    }
+                });
+            }
+            
+            openMenu(x, y) {
+                this.isActive = true;
+                this.startPos = { x, y };
+                this.isDragging = false;
+                this.currentSelection = null;
+                
+                // Position menu at cursor
+                this.menu.style.left = (x - 150) + 'px';
+                this.menu.style.top = (y - 150) + 'px';
+                this.menu.classList.add('active');
+                
+                // Clear previous selections
+                document.querySelectorAll('.marking-item').forEach(item => {
+                    item.classList.remove('selected');
+                });
+                
+                console.log('Marking menu opened at:', x, y);
+            }
+            
+            handleMouseMove(e) {
+                if (!this.isActive) return;
+                
+                const deltaX = e.clientX - this.startPos.x;
+                const deltaY = e.clientY - this.startPos.y;
+                const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                
+                // Check if we've started dragging
+                if (distance > this.dragThreshold && !this.isDragging) {
+                    this.isDragging = true;
+                    console.log('Started marking menu drag');
+                }
+                
+                if (this.isDragging) {
+                    this.updateSelection(e.clientX, e.clientY);
+                }
+            }
+            
+            updateSelection(x, y) {
+                const menuRect = this.menu.getBoundingClientRect();
+                const centerX = menuRect.left + menuRect.width / 2;
+                const centerY = menuRect.top + menuRect.height / 2;
+                
+                const deltaX = x - centerX;
+                const deltaY = y - centerY;
+                const angle = Math.atan2(deltaY, deltaX);
+                const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                
+                // Clear previous selection
+                document.querySelectorAll('.marking-item').forEach(item => {
+                    item.classList.remove('selected');
+                });
+                
+                // Find which item is closest to the angle
+                const items = document.querySelectorAll('.marking-item');
+                let bestItem = null;
+                let bestAngle = Infinity;
+                
+                items.forEach(item => {
+                    const itemRect = item.getBoundingClientRect();
+                    const itemCenterX = itemRect.left + itemRect.width / 2;
+                    const itemCenterY = itemRect.top + itemRect.height / 2;
+                    
+                    const itemDeltaX = itemCenterX - centerX;
+                    const itemDeltaY = itemCenterY - centerY;
+                    const itemAngle = Math.atan2(itemDeltaY, itemDeltaX);
+                    
+                    const angleDiff = Math.abs(angle - itemAngle);
+                    const normalizedAngleDiff = Math.min(angleDiff, 2 * Math.PI - angleDiff);
+                    
+                    if (normalizedAngleDiff < bestAngle) {
+                        bestAngle = normalizedAngleDiff;
+                        bestItem = item;
+                    }
+                });
+                
+                // Select the best item if we're far enough from center
+                if (distance > 50 && bestItem) {
+                    bestItem.classList.add('selected');
+                    this.currentSelection = bestItem;
+                } else {
+                    this.currentSelection = null;
+                }
+            }
+            
+            handleMouseUp(e) {
+                if (!this.isActive) return;
+                
+                if (this.currentSelection) {
+                    const category = this.currentSelection.dataset.category;
+                    const name = this.currentSelection.dataset.name;
+                    this.createNode(category, name, e.clientX, e.clientY);
+                    console.log(`Created ${name} node (${category}) at:`, e.clientX, e.clientY);
+                }
+                
+                this.closeMenu();
+            }
+            
+            closeMenu() {
+                this.isActive = false;
+                this.menu.classList.remove('active');
+                this.currentSelection = null;
+                console.log('Marking menu closed');
+            }
+            
+            createNode(category, name, x, y) {
+                const node = document.createElement('div');
+                node.className = `sample-node ${category.toLowerCase()}`;
+                node.style.left = (x - 60) + 'px';
+                node.style.top = (y - 40) + 'px';
+                
+                node.innerHTML = `
+                    <div class="node-title">${name}</div>
+                    <div class="node-type">${category}</div>
+                `;
+                
+                // Make node draggable
+                this.makeNodeDraggable(node);
+                
+                this.canvas.appendChild(node);
+            }
+            
+            makeNodeDraggable(node) {
+                let isDragging = false;
+                let startX, startY, startLeft, startTop;
+                
+                node.addEventListener('mousedown', (e) => {
+                    if (e.button === 0) { // Left click only
+                        isDragging = true;
+                        startX = e.clientX;
+                        startY = e.clientY;
+                        startLeft = parseInt(node.style.left) || 0;
+                        startTop = parseInt(node.style.top) || 0;
+                        
+                        // Add selected state
+                        document.querySelectorAll('.sample-node').forEach(n => n.classList.remove('selected'));
+                        node.classList.add('selected');
+                        
+                        e.preventDefault();
+                    }
+                });
+                
+                document.addEventListener('mousemove', (e) => {
+                    if (isDragging) {
+                        const deltaX = e.clientX - startX;
+                        const deltaY = e.clientY - startY;
+                        
+                        node.style.left = (startLeft + deltaX) + 'px';
+                        node.style.top = (startTop + deltaY) + 'px';
+                    }
+                });
+                
+                document.addEventListener('mouseup', () => {
+                    isDragging = false;
+                });
+                
+                // Right-click on node for context menu
+                node.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.openMenu(e.clientX, e.clientY);
+                });
+            }
+        }
+        
+        // Initialize marking menu
+        const markingMenu = new MarkingMenu();
+        
+        // Marking Menu Toggle (old radial menu)
+        const markingMenuBtn = document.getElementById('markingMenuBtn');
+        const radialMenu = document.getElementById('radialMenu');
+        
+        markingMenuBtn.addEventListener('click', () => {
+            radialMenu.classList.toggle('active');
+        });
+        
+        // Close marking menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!radialMenu.contains(e.target) && !markingMenuBtn.contains(e.target)) {
+                radialMenu.classList.remove('active');
+            }
+        });
+        
+        // Radial menu item selection
+        document.querySelectorAll('.radial-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const category = item.textContent;
+                console.log(`Selected category: ${category}`);
+                radialMenu.classList.remove('active');
+                // Here you would trigger node creation with the selected category
+            });
+        });
+        
+        // Compact toolbar selection
+        document.querySelectorAll('.toolbar-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const category = item.textContent;
+                console.log(`Selected category: ${category}`);
+                // Here you would trigger node creation with the selected category
+            });
+        });
+        
+        // Physics panel toggle
+        const physicsToggle = document.getElementById('physicsToggle');
+        const physicsControlsContainer = document.getElementById('physicsControlsContainer');
+        
+        physicsToggle.addEventListener('click', () => {
+            const isVisible = physicsControlsContainer.style.display !== 'none';
+            physicsControlsContainer.style.display = isVisible ? 'none' : 'block';
+            physicsToggle.textContent = isVisible ? '▶' : '▼';
+        });
+        
+        // Saturation slider
+        const saturationSlider = document.getElementById('saturationSlider');
+        const saturationValue = document.getElementById('saturationValue');
+        
+        saturationSlider.addEventListener('input', (e) => {
+            const value = e.target.value;
+            saturationValue.textContent = value + '%';
+        });
+        
+        // Color picker changes
+        document.querySelectorAll('.category-color-picker').forEach(picker => {
+            picker.addEventListener('change', (e) => {
+                console.log(`Color changed: ${e.target.id} = ${e.target.value}`);
+            });
+        });
+        
+        // Palette selector
+        const paletteSelector = document.getElementById('paletteSelector');
+        paletteSelector.addEventListener('change', (e) => {
+            console.log(`Palette changed: ${e.target.value}`);
+        });
+        
+        // Reset button
+        const resetButton = document.getElementById('colorReset');
+        resetButton.addEventListener('click', () => {
+            saturationSlider.value = 100;
+            saturationValue.textContent = '100%';
+            console.log('Colors reset to defaults');
+        });
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            const key = e.key.toLowerCase();
+            const categories = {
+                'g': 'GN',
+                'm': 'MN',
+                'u': 'UN',
+                'd': 'DN'
+            };
+            
+            if (categories[key]) {
+                console.log(`Hotkey pressed: ${key} -> ${categories[key]}`);
+                // Here you would trigger node creation with the selected category
+            }
+            
+            if (key === 'r') {
+                radialMenu.classList.toggle('active');
+            }
+            
+            if (key === 'p') {
+                const physicsPanel = document.querySelector('.physics-panel');
+                const isVisible = physicsPanel.style.display !== 'none';
+                physicsPanel.style.display = isVisible ? 'none' : 'block';
+                console.log(`Physics panel ${isVisible ? 'hidden' : 'shown'} with P key`);
+            }
+            
+            if (key === 'c') {
+                const colorPanel = document.querySelector('.color-panel');
+                const isVisible = colorPanel.style.display !== 'none';
+                colorPanel.style.display = isVisible ? 'none' : 'block';
+                console.log(`Color panel ${isVisible ? 'hidden' : 'shown'} with C key`);
+            }
+        });
+        
+        // Tooltip system
+        const tooltip = document.getElementById('tooltip');
+        
+        document.querySelectorAll('[title]').forEach(element => {
+            element.addEventListener('mouseenter', (e) => {
+                tooltip.textContent = e.target.title;
+                tooltip.style.display = 'block';
+            });
+            
+            element.addEventListener('mousemove', (e) => {
+                tooltip.style.left = e.pageX + 10 + 'px';
+                tooltip.style.top = e.pageY + 10 + 'px';
+            });
+            
+            element.addEventListener('mouseleave', () => {
+                tooltip.style.display = 'none';
+            });
+        });
+        
+        // Auto-save functionality (localStorage)
+        function saveSettings() {
+            const settings = {
+                saturation: saturationSlider.value,
+                palette: paletteSelector.value,
+                physicsVisible: physicsControlsContainer.style.display !== 'none'
+            };
+            localStorage.setItem('nodeEditorSettings', JSON.stringify(settings));
+        }
+        
+        function loadSettings() {
+            const saved = localStorage.getItem('nodeEditorSettings');
+            if (saved) {
+                const settings = JSON.parse(saved);
+                saturationSlider.value = settings.saturation || 100;
+                saturationValue.textContent = (settings.saturation || 100) + '%';
+                paletteSelector.value = settings.palette || 'material';
+                if (settings.physicsVisible === false) {
+                    physicsControlsContainer.style.display = 'none';
+                    physicsToggle.textContent = '▶';
+                }
+            }
+            
+            // Physics panel starts hidden by default
+            const physicsPanel = document.querySelector('.physics-panel');
+            physicsPanel.style.display = 'none';
+        }
+        
+        // Save settings on changes
+        saturationSlider.addEventListener('change', saveSettings);
+        paletteSelector.addEventListener('change', saveSettings);
+        physicsToggle.addEventListener('click', saveSettings);
+        
+        // Load settings on startup
+        loadSettings();
+        
+        console.log('TexN Node Editor Loaded');
+        console.log('Features: Right-Click Marking Menus, Color Controls, Physics Panel, Auto-save, Draggable Nodes');
+        console.log('Right-click on canvas to open marking menu, drag to select, release to create node');
+    </script>
+</body>
+</html> 

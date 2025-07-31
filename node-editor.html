@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Node Editor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e1e1e 0%, #2d2d2d 100%);
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 350px;
+            background: rgba(30, 30, 30, 0.95);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid #444;
+            padding: 20px;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .preview-area {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(45deg, #333 25%, transparent 25%), 
+                        linear-gradient(-45deg, #333 25%, transparent 25%), 
+                        linear-gradient(45deg, transparent 75%, #333 75%), 
+                        linear-gradient(-45deg, transparent 75%, #333 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+            position: relative;
+        }
+
+        .section {
+            margin-bottom: 25px;
+            padding: 15px;
+            background: rgba(45, 45, 45, 0.8);
+            border-radius: 8px;
+            border-left: 3px solid #00aaff;
+        }
+
+        .section h3 {
+            margin-bottom: 15px;
+            color: #00aaff;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .control-group {
+            margin-bottom: 12px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 13px;
+            color: #cccccc;
+            font-weight: 500;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            background: #555;
+            border-radius: 3px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #00aaff;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            background: #0088cc;
+            transform: scale(1.1);
+        }
+
+        input[type="number"], input[type="text"], input[type="color"] {
+            width: 100%;
+            padding: 8px 10px;
+            background: #333;
+            border: 1px solid #555;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 13px;
+            transition: border-color 0.2s ease;
+        }
+
+        input[type="number"]:focus, input[type="text"]:focus, input[type="color"]:focus {
+            outline: none;
+            border-color: #00aaff;
+        }
+
+        .value-display {
+            display: inline-block;
+            float: right;
+            color: #00aaff;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .color-preview {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+            display: inline-block;
+            margin-left: 8px;
+            border: 1px solid #666;
+        }
+
+                 .node-preview {
+             position: relative;
+             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+             transition: all 0.3s ease;
+             border-radius: 0; /* Remove default border radius for 9-slice */
+         }
+
+        .node-preview:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .reset-btn {
+            background: linear-gradient(135deg, #ff4444, #cc0000);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .reset-btn:hover {
+            background: linear-gradient(135deg, #ff6666, #ee2222);
+            transform: translateY(-1px);
+        }
+
+        .save-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 170, 255, 0.9);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 12px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1000;
+        }
+
+        .save-status.show {
+            opacity: 1;
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .port-circle {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #666;
+            position: absolute;
+        }
+
+        .export-section {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 100, 0, 0.2);
+            border-radius: 8px;
+            border-left: 3px solid #00aa00;
+        }
+
+        .export-btn {
+            background: linear-gradient(135deg, #00aa00, #008800);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            width: 100%;
+            margin: 5px 0;
+        }
+
+        .export-btn:hover {
+            background: linear-gradient(135deg, #00cc00, #00aa00);
+            transform: translateY(-1px);
+        }
+
+                 textarea {
+             width: 100%;
+             height: 100px;
+             background: #333;
+             border: 1px solid #555;
+             border-radius: 4px;
+             color: #fff;
+             font-size: 11px;
+             font-family: 'Courier New', monospace;
+             padding: 8px;
+             resize: vertical;
+         }
+
+         .file-input {
+             background: #444 !important;
+             color: #fff !important;
+             border: 1px solid #666 !important;
+             padding: 8px !important;
+             border-radius: 4px !important;
+             cursor: pointer;
+             transition: border-color 0.2s ease;
+         }
+
+         .file-input:hover {
+             border-color: #00aaff !important;
+         }
+
+         .slice-lines {
+             position: absolute;
+             top: 0;
+             left: 0;
+             right: 0;
+             bottom: 0;
+             pointer-events: none;
+             border: 2px dashed rgba(0, 170, 255, 0.7);
+         }
+
+         .slice-line-v {
+             position: absolute;
+             top: 0;
+             bottom: 0;
+             width: 2px;
+             background: rgba(0, 170, 255, 0.7);
+             border-radius: 1px;
+         }
+
+         .slice-line-h {
+             position: absolute;
+             left: 0;
+             right: 0;
+             height: 2px;
+             background: rgba(0, 170, 255, 0.7);
+             border-radius: 1px;
+         }
+
+         input[type="checkbox"] {
+             margin-right: 8px;
+             accent-color: #00aaff;
+         }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h2 style="margin-bottom: 20px; color: #00aaff; text-align: center;">Node Editor</h2>
+            
+            <div class="section">
+                <h3>📐 Dimensions</h3>
+                <div class="control-group">
+                    <label>Width <span class="value-display" id="widthValue">720</span></label>
+                    <input type="range" id="width" min="100" max="1000" value="720">
+                </div>
+                <div class="control-group">
+                    <label>Height <span class="value-display" id="heightValue">720</span></label>
+                    <input type="range" id="height" min="100" max="1000" value="720">
+                </div>
+                <div class="control-group">
+                    <label>Visual Scale <span class="value-display" id="scaleValue">0.25</span></label>
+                    <input type="range" id="scale" min="0.1" max="1" step="0.05" value="0.25">
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>🎨 Colors</h3>
+                <div class="control-group">
+                    <label>Background Color <span class="color-preview" id="bgColorPreview"></span></label>
+                    <input type="color" id="bgColor" value="#3a3a3a">
+                </div>
+                <div class="control-group">
+                    <label>Border Color <span class="color-preview" id="borderColorPreview"></span></label>
+                    <input type="color" id="borderColor" value="#2a2a2a">
+                </div>
+                <div class="control-group">
+                    <label>Header Color <span class="color-preview" id="headerColorPreview"></span></label>
+                    <input type="color" id="headerColor" value="#444444">
+                </div>
+                <div class="control-group">
+                    <label>Text Color <span class="color-preview" id="textColorPreview"></span></label>
+                    <input type="color" id="textColor" value="#cccccc">
+                </div>
+            </div>
+
+                         <div class="section">
+                 <h3>📏 Border & Corners</h3>
+                 <div class="control-group">
+                     <label>Border Width <span class="value-display" id="borderWidthValue">2</span></label>
+                     <input type="range" id="borderWidth" min="0" max="10" value="2">
+                 </div>
+                 <div class="control-group">
+                     <label>Corner Radius <span class="value-display" id="cornerRadiusValue">4</span></label>
+                     <input type="range" id="cornerRadius" min="0" max="20" value="4">
+                 </div>
+                 <div class="control-group">
+                     <label>9-Slice Corner Size <span class="value-display" id="sliceSizeValue">50</span></label>
+                     <input type="range" id="sliceSize" min="10" max="100" value="50">
+                 </div>
+                 <div class="control-group">
+                     <label>
+                         <input type="checkbox" id="showSliceLines" checked> Show 9-Slice Grid
+                     </label>
+                 </div>
+             </div>
+
+             <div class="section">
+                 <h3>🖼️ Texture Upload</h3>
+                 <div class="control-group">
+                     <label>Node Base Texture</label>
+                     <input type="file" id="nodeBaseUpload" accept="image/png" class="file-input">
+                 </div>
+                 <div class="control-group">
+                     <label>Node Hover Texture</label>
+                     <input type="file" id="nodeHoverUpload" accept="image/png" class="file-input">
+                 </div>
+                 <div class="control-group">
+                     <label>Node Selected Texture</label>
+                     <input type="file" id="nodeSelectedUpload" accept="image/png" class="file-input">
+                 </div>
+                 <button class="reset-btn" onclick="resetTextures()">🔄 Reset to Default Textures</button>
+             </div>
+
+            <div class="section">
+                <h3>⚡ Ports</h3>
+                <div class="control-group">
+                    <label>Port Size <span class="value-display" id="portSizeValue">6</span></label>
+                    <input type="range" id="portSize" min="3" max="15" value="6">
+                </div>
+                <div class="control-group">
+                    <label>Port Color <span class="color-preview" id="portColorPreview"></span></label>
+                    <input type="color" id="portColor" value="#666666">
+                </div>
+                <div class="control-group">
+                    <label>Port Spacing <span class="value-display" id="portSpacingValue">125</span></label>
+                    <input type="range" id="portSpacing" min="20" max="250" value="125">
+                </div>
+                <div class="control-group">
+                    <label>Port Offset Y <span class="value-display" id="portOffsetYValue">100</span></label>
+                    <input type="range" id="portOffsetY" min="50" max="200" value="100">
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>📝 Typography</h3>
+                <div class="control-group">
+                    <label>Font Size <span class="value-display" id="fontSizeValue">12</span></label>
+                    <input type="range" id="fontSize" min="8" max="24" value="12">
+                </div>
+                <div class="control-group">
+                    <label>Font Family</label>
+                    <input type="text" id="fontFamily" value="Arial">
+                </div>
+                <div class="two-column">
+                    <div class="control-group">
+                        <label>Label X <span class="value-display" id="labelXValue">100</span></label>
+                        <input type="range" id="labelX" min="0" max="200" value="100">
+                    </div>
+                    <div class="control-group">
+                        <label>Label Y <span class="value-display" id="labelYValue">80</span></label>
+                        <input type="range" id="labelY" min="0" max="200" value="80">
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>✨ Effects</h3>
+                <div class="control-group">
+                    <label>Hover Outline Alpha <span class="value-display" id="hoverAlphaValue">1</span></label>
+                    <input type="range" id="hoverAlpha" min="0" max="1" step="0.1" value="1">
+                </div>
+                <div class="control-group">
+                    <label>Selection Outline Alpha <span class="value-display" id="selectionAlphaValue">1</span></label>
+                    <input type="range" id="selectionAlpha" min="0" max="1" step="0.1" value="1">
+                </div>
+                <div class="two-column">
+                    <div class="control-group">
+                        <label>Fade In Speed <span class="value-display" id="fadeInSpeedValue">0.2</span></label>
+                        <input type="range" id="fadeInSpeed" min="0.1" max="1" step="0.1" value="0.2">
+                    </div>
+                    <div class="control-group">
+                        <label>Fade Out Speed <span class="value-display" id="fadeOutSpeedValue">0.05</span></label>
+                        <input type="range" id="fadeOutSpeed" min="0.01" max="0.5" step="0.01" value="0.05">
+                    </div>
+                </div>
+            </div>
+
+            <button class="reset-btn" onclick="resetToDefaults()">🔄 Reset to Defaults</button>
+
+            <div class="export-section">
+                <h3>💾 Export</h3>
+                <button class="export-btn" onclick="exportConfig()">📋 Copy Configuration</button>
+                <button class="export-btn" onclick="downloadConfig()">⬇️ Download JSON</button>
+                <textarea id="configOutput" placeholder="Configuration will appear here..." readonly></textarea>
+            </div>
+        </div>
+
+                 <div class="preview-area">
+             <div class="node-preview" id="nodePreview">
+                 <div id="nodeLabel">SAMPLE NODE</div>
+                 <canvas id="nodeThumbnail" style="position: absolute; opacity: 0.8;"></canvas>
+             </div>
+         </div>
+    </div>
+
+    <div class="save-status" id="saveStatus">Configuration saved!</div>
+
+    <script>
+        const config = {
+            width: 720,
+            height: 720,
+            scale: 0.25,
+            bgColor: '#3a3a3a',
+            borderColor: '#2a2a2a',
+            headerColor: '#444444',
+            textColor: '#cccccc',
+            borderWidth: 2,
+            cornerRadius: 4,
+            sliceSize: 50,
+            portSize: 6,
+            portColor: '#666666',
+            portSpacing: 125,
+            portOffsetY: 100,
+            fontSize: 12,
+            fontFamily: 'Arial',
+            labelX: 100,
+            labelY: 80,
+            hoverAlpha: 1,
+            selectionAlpha: 1,
+            fadeInSpeed: 0.2,
+            fadeOutSpeed: 0.15
+        };
+
+        // Load saved configuration
+        function loadConfig() {
+            const saved = localStorage.getItem('nodeEditorConfig');
+            if (saved) {
+                Object.assign(config, JSON.parse(saved));
+                console.log('Node editor: Loaded config from localStorage:', config);
+                updateAllInputs();
+            } else {
+                console.log('Node editor: No saved config found, using defaults');
+            }
+        }
+
+        // Save configuration
+        function saveConfig() {
+            localStorage.setItem('nodeEditorConfig', JSON.stringify(config));
+            console.log('Node editor: Saved config to localStorage:', config);
+            showSaveStatus();
+        }
+
+        // Show save status
+        function showSaveStatus() {
+            const status = document.getElementById('saveStatus');
+            status.classList.add('show');
+            setTimeout(() => status.classList.remove('show'), 2000);
+        }
+
+        // Update all inputs from config
+        function updateAllInputs() {
+            Object.keys(config).forEach(key => {
+                const input = document.getElementById(key);
+                if (input) {
+                    input.value = config[key];
+                    updateValueDisplay(key);
+                }
+            });
+            updatePreview();
+        }
+
+        // Update value display
+        function updateValueDisplay(key) {
+            const display = document.getElementById(key + 'Value');
+            if (display) {
+                display.textContent = config[key];
+            }
+            
+            // Update color previews
+            if (key.includes('Color')) {
+                const preview = document.getElementById(key + 'Preview');
+                if (preview) {
+                    preview.style.backgroundColor = config[key];
+                }
+            }
+        }
+
+                 // Update preview
+         function updatePreview() {
+             const preview = document.getElementById('nodePreview');
+             const label = document.getElementById('nodeLabel');
+             
+             const visualWidth = config.width * config.scale;
+             const visualHeight = config.height * config.scale;
+             
+             preview.style.width = visualWidth + 'px';
+             preview.style.height = visualHeight + 'px';
+             
+             // Always apply CSS styling (9-slice will override if present)
+             preview.style.backgroundColor = config.bgColor;
+             preview.style.border = `${config.borderWidth}px solid ${config.borderColor}`;
+             preview.style.borderRadius = config.cornerRadius + 'px';
+             
+             label.style.color = config.textColor;
+             label.style.fontSize = (config.fontSize * config.scale) + 'px';
+             label.style.fontFamily = config.fontFamily;
+             label.style.position = 'absolute';
+             label.style.left = (config.labelX * config.scale) + 'px';
+             label.style.top = (config.labelY * config.scale) + 'px';
+             
+             // Update 9-slice visualization
+             updateSliceLines();
+             
+             // Update 9-slice texture if present
+             const preview = document.getElementById('nodePreview');
+             if (preview.style.borderImageSource && preview.style.borderImageSource !== 'none') {
+                 const imageUrl = preview.style.borderImageSource.slice(5, -2); // Remove 'url("' and '")'
+                 apply9SliceTexture(preview, imageUrl);
+             }
+             
+             // Update thumbnail
+             updateThumbnail();
+            
+                         // Remove existing ports
+             const existingPorts = preview.querySelectorAll('.port-circle, .port-rectangle');
+             existingPorts.forEach(port => port.remove());
+            
+                         // Add sample ports (centered and evenly spaced)
+             const numPorts = 2;
+             const centerY = config.height / 2;
+             
+             for (let i = 0; i < numPorts; i++) {
+                 let portY;
+                 if (numPorts === 1) {
+                     portY = centerY;
+                 } else {
+                     const totalSpacing = (numPorts - 1) * config.portSpacing;
+                     const startY = centerY - (totalSpacing / 2);
+                     portY = startY + i * config.portSpacing;
+                 }
+                 
+                 // Input port (gradient rectangle, more vertical, close to node)
+                 const inputPort = document.createElement('div');
+                 inputPort.className = 'port-rectangle';
+                 inputPort.style.background = `linear-gradient(to right, ${config.portColor}, transparent)`;
+                 inputPort.style.width = (config.portSize * 2 * config.scale) + 'px'; // Narrower
+                 inputPort.style.height = (config.portSize * 6 * config.scale) + 'px'; // More vertical
+                 inputPort.style.right = '-2px'; // Very close to node edge
+                 inputPort.style.top = (portY * config.scale - (config.portSize * 3 * config.scale)) + 'px';
+                 inputPort.style.position = 'absolute';
+                 preview.appendChild(inputPort);
+                 
+                 // Output port (gradient rectangle, more vertical, close to node)
+                 const outputPort = document.createElement('div');
+                 outputPort.className = 'port-rectangle';
+                 outputPort.style.background = `linear-gradient(to left, ${config.portColor}, transparent)`;
+                 outputPort.style.width = (config.portSize * 2 * config.scale) + 'px'; // Narrower
+                 outputPort.style.height = (config.portSize * 6 * config.scale) + 'px'; // More vertical
+                 outputPort.style.left = '-2px'; // Very close to node edge
+                 outputPort.style.top = (portY * config.scale - (config.portSize * 3 * config.scale)) + 'px';
+                 outputPort.style.position = 'absolute';
+                 preview.appendChild(outputPort);
+             }
+        }
+
+        // Reset to defaults
+        function resetToDefaults() {
+            if (confirm('Reset all settings to default values?')) {
+                Object.assign(config, {
+                    width: 720,
+                    height: 720,
+                    scale: 0.25,
+                    bgColor: '#3a3a3a',
+                    borderColor: '#2a2a2a',
+                    headerColor: '#444444',
+                    textColor: '#cccccc',
+                    borderWidth: 2,
+                    cornerRadius: 4,
+                    sliceSize: 50,
+                    portSize: 6,
+                    portColor: '#666666',
+                                         portSpacing: 125,
+                    portOffsetY: 100,
+                    fontSize: 12,
+                    fontFamily: 'Arial',
+                    labelX: 100,
+                    labelY: 80,
+                    hoverAlpha: 1,
+                    selectionAlpha: 1,
+                    fadeInSpeed: 0.2,
+                    fadeOutSpeed: 0.15
+                });
+                updateAllInputs();
+                saveConfig();
+            }
+        }
+
+        // Export configuration
+        function exportConfig() {
+            const configText = JSON.stringify(config, null, 2);
+            document.getElementById('configOutput').value = configText;
+            navigator.clipboard.writeText(configText).then(() => {
+                alert('Configuration copied to clipboard!');
+            });
+        }
+
+        // Download configuration
+        function downloadConfig() {
+            const configText = JSON.stringify(config, null, 2);
+            const blob = new Blob([configText], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'node-config.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+                 // Update 9-slice visualization
+         function updateSliceLines() {
+             const preview = document.getElementById('nodePreview');
+             const showLines = document.getElementById('showSliceLines').checked;
+             
+             // Remove existing slice lines
+             const existingLines = preview.querySelectorAll('.slice-line-v, .slice-line-h, .slice-lines');
+             existingLines.forEach(line => line.remove());
+             
+             if (!showLines) return;
+             
+             const visualWidth = config.width * config.scale;
+             const visualHeight = config.height * config.scale;
+             const sliceSize = config.sliceSize * config.scale;
+             
+             // Create outer border
+             const border = document.createElement('div');
+             border.className = 'slice-lines';
+             preview.appendChild(border);
+             
+             // Vertical lines (left and right slice boundaries)
+             if (sliceSize < visualWidth / 2) {
+                 const leftLine = document.createElement('div');
+                 leftLine.className = 'slice-line-v';
+                 leftLine.style.left = sliceSize + 'px';
+                 preview.appendChild(leftLine);
+                 
+                 const rightLine = document.createElement('div');
+                 rightLine.className = 'slice-line-v';
+                 rightLine.style.right = sliceSize + 'px';
+                 preview.appendChild(rightLine);
+             }
+             
+             // Horizontal lines (top and bottom slice boundaries)
+             if (sliceSize < visualHeight / 2) {
+                 const topLine = document.createElement('div');
+                 topLine.className = 'slice-line-h';
+                 topLine.style.top = sliceSize + 'px';
+                 preview.appendChild(topLine);
+                 
+                 const bottomLine = document.createElement('div');
+                 bottomLine.className = 'slice-line-h';
+                 bottomLine.style.bottom = sliceSize + 'px';
+                 preview.appendChild(bottomLine);
+             }
+         }
+
+         // Handle file uploads
+         function handleFileUpload(inputId, textureType) {
+             const input = document.getElementById(inputId);
+             input.addEventListener('change', (e) => {
+                 const file = e.target.files[0];
+                 if (file && file.type === 'image/png') {
+                     const reader = new FileReader();
+                     reader.onload = (event) => {
+                         const dataUrl = event.target.result;
+                         localStorage.setItem(`nodeTexture_${textureType}`, dataUrl);
+                         console.log(`Uploaded ${textureType} texture:`, dataUrl.substring(0, 50) + '...');
+                         
+                         // Apply texture to preview with 9-slice scaling
+                         const preview = document.getElementById('nodePreview');
+                         apply9SliceTexture(preview, dataUrl);
+                         
+                         showSaveStatus();
+                     };
+                     reader.readAsDataURL(file);
+                 } else {
+                     alert('Please select a PNG file.');
+                 }
+             });
+         }
+
+         // Generate and update thumbnail preview
+         function updateThumbnail() {
+             const canvas = document.getElementById('nodeThumbnail');
+             const preview = document.getElementById('nodePreview');
+             
+             // Size the thumbnail canvas
+             const thumbnailSize = Math.min(config.width * config.scale * 0.6, config.height * config.scale * 0.6);
+             canvas.width = thumbnailSize;
+             canvas.height = thumbnailSize;
+             canvas.style.width = thumbnailSize + 'px';
+             canvas.style.height = thumbnailSize + 'px';
+             canvas.style.left = '50%';
+             canvas.style.top = '50%';
+             canvas.style.transform = 'translate(-50%, -50%)';
+             
+             const ctx = canvas.getContext('2d');
+             
+             // Generate a sample noise pattern as thumbnail
+             const imageData = ctx.createImageData(thumbnailSize, thumbnailSize);
+             const data = imageData.data;
+             
+             for (let i = 0; i < data.length; i += 4) {
+                 const noise = Math.random() * 255;
+                 data[i] = noise;     // Red
+                 data[i + 1] = noise; // Green  
+                 data[i + 2] = noise; // Blue
+                 data[i + 3] = 255;   // Alpha
+             }
+             
+             ctx.putImageData(imageData, 0, 0);
+         }
+
+         // Apply 9-slice texture to an element
+         function apply9SliceTexture(element, imageUrl) {
+             const sliceSize = config.sliceSize;
+             const elementWidth = config.width * config.scale;
+             const elementHeight = config.height * config.scale;
+             
+             // Calculate slice percentages based on original texture size
+             // Assuming the texture is designed for the config dimensions
+             const slicePercentX = (sliceSize / config.width) * 100;
+             const slicePercentY = (sliceSize / config.height) * 100;
+             
+             // Create 9-slice using CSS border-image
+             element.style.borderImageSource = `url(${imageUrl})`;
+             element.style.borderImageSlice = `${slicePercentY}% ${slicePercentX}% ${slicePercentY}% ${slicePercentX}% fill`;
+             element.style.borderImageWidth = `${sliceSize * config.scale}px`;
+             element.style.borderImageRepeat = 'stretch';
+             element.style.borderStyle = 'solid';
+             
+             // Remove regular background
+             element.style.backgroundImage = 'none';
+         }
+
+         // Reset textures to default
+         function resetTextures() {
+             if (confirm('Reset all textures to default? This will clear uploaded images.')) {
+                 localStorage.removeItem('nodeTexture_base');
+                 localStorage.removeItem('nodeTexture_hover');
+                 localStorage.removeItem('nodeTexture_selected');
+                 
+                 const preview = document.getElementById('nodePreview');
+                 preview.style.backgroundImage = 'none';
+                 preview.style.borderImageSource = 'none';
+                 preview.style.borderStyle = 'solid';
+                 
+                 // Restore CSS styling
+                 preview.style.backgroundColor = config.bgColor;
+                 preview.style.border = `${config.borderWidth}px solid ${config.borderColor}`;
+                 preview.style.borderRadius = config.cornerRadius + 'px';
+                 
+                 // Clear file inputs
+                 document.getElementById('nodeBaseUpload').value = '';
+                 document.getElementById('nodeHoverUpload').value = '';
+                 document.getElementById('nodeSelectedUpload').value = '';
+                 
+                 console.log('Textures reset to default');
+                 showSaveStatus();
+             }
+         }
+
+         // Setup event listeners
+         function setupEventListeners() {
+             Object.keys(config).forEach(key => {
+                 const input = document.getElementById(key);
+                 if (input) {
+                     input.addEventListener('input', (e) => {
+                         let value = e.target.value;
+                         if (input.type === 'range' || input.type === 'number') {
+                             value = parseFloat(value);
+                         }
+                         config[key] = value;
+                         updateValueDisplay(key);
+                         updatePreview();
+                         saveConfig();
+                     });
+                 }
+             });
+             
+             // Setup 9-slice toggle
+             document.getElementById('showSliceLines').addEventListener('change', updateSliceLines);
+             
+             // Setup file upload handlers
+             handleFileUpload('nodeBaseUpload', 'base');
+             handleFileUpload('nodeHoverUpload', 'hover');
+             handleFileUpload('nodeSelectedUpload', 'selected');
+         }
+
+        // Initialize
+        loadConfig();
+        setupEventListeners();
+        updatePreview();
+        
+        // Save initial config if none exists
+        if (!localStorage.getItem('nodeEditorConfig')) {
+            saveConfig();
+        }
+        
+        // Update color previews on load
+        ['bgColor', 'borderColor', 'headerColor', 'textColor', 'portColor'].forEach(key => {
+            updateValueDisplay(key);
+        });
+        
+        // Force preview update after everything is loaded
+        setTimeout(() => {
+            updatePreview();
+        }, 100);
+    </script>
+</body>
+</html> 

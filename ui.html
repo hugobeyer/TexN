@@ -1,0 +1,3250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Substance Designer Mini</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: 'JetBrains Mono', Consolas, 'Courier New', monospace;
+            background: #1a1a1a;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        
+        #app {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+        
+        .context-menu {
+            position: absolute;
+            display: none;
+            background: rgba(40, 40, 40, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+            padding: 5px;
+            min-width: 200px;
+            pointer-events: all;
+            z-index: 1000;
+        }
+
+        .context-menu.active {
+            display: block;
+        }
+
+        .context-menu-item {
+            color: #fff;
+            padding: 8px 12px;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 4px;
+            white-space: nowrap;
+        }
+
+        .context-menu-item:hover {
+            background: rgba(80, 80, 80, 0.95);
+        }
+
+        /* Color Palette Controls */
+        .color-panel {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(30, 30, 30, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        
+        .color-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+            border-bottom: 1px solid #444;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .color-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #ffffff;
+            letter-spacing: 1px;
+        }
+        
+        .color-toggle {
+            background: none;
+            border: none;
+            color: #ffffff;
+            font-size: 12px;
+            cursor: pointer;
+            padding: 0;
+            margin-left: 20px;
+            transition: transform 0.3s ease;
+        }
+        
+        .color-toggle:hover {
+            color: #00ffff;
+        }
+        
+        .color-controls-container {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 7px;
+            padding: 5px 8px;
+            transition: max-height 0.3s ease, opacity 0.3s ease;
+            overflow: hidden;
+            max-height: 60px;
+            align-items: center;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+        }
+        
+        .category-colors {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .category-list {
+            display: flex;
+            gap: 2px;
+        }
+        
+        .category-item {
+            display: flex;
+            align-items: center;
+            gap: 1px;
+        }
+        
+        .category-label {
+            font-size: 5px;
+            color: #666;
+            font-weight: 400;
+            min-width: 10px;
+            text-align: center;
+            margin-left: 2px;
+        }
+        
+        .category-color-picker {
+            width: 21px;
+            height: 15px;
+            border: 1px solid #555;
+            border-radius: 0px;
+            cursor: pointer;
+            background: transparent;
+            padding: 0;
+        }
+        
+        .category-color-picker::-webkit-color-swatch-wrapper {
+            padding: 2px;
+        }
+        
+        .category-color-picker::-webkit-color-swatch {
+            border: none;
+            border-radius: 0px;
+        }
+        
+        #saturationSlider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 10px;
+            height: 10px;
+            background: #fff;
+            border-radius: 0px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+            transition: all 0.2s ease;
+        }
+        
+        #saturationSlider::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+        }
+        
+
+        
+        .color-controls-container.collapsed {
+            max-height: 0;
+            padding: 0 20px;
+            opacity: 0;
+        }
+        
+
+        
+        .color-reset {
+            background: none;
+            border: 1px solid #555;
+            color: #ccc;
+            padding: 3px 6px;
+            border-radius: 0px;
+            cursor: pointer;
+            font-size: 7px;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        
+        .color-reset:hover {
+            border-color: #00ffff;
+            color: #00ffff;
+        }
+
+        /* Physics Controls */
+        .physics-panel {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(30, 30, 30, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        
+        .physics-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+            border-bottom: 1px solid #444;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .physics-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #ffffff;
+            letter-spacing: 1px;
+        }
+        
+        .physics-toggle {
+            background: none;
+            border: none;
+            color: #ffffff;
+            font-size: 12px;
+            cursor: pointer;
+            padding: 0;
+            margin-left: 20px;
+            transition: transform 0.3s ease;
+        }
+        
+        .physics-toggle:hover {
+            color: #00ffff;
+        }
+        
+        .physics-controls-container {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            padding: 15px 20px;
+            transition: max-height 0.3s ease, opacity 0.3s ease;
+            overflow: hidden;
+            max-height: 200px;
+        }
+        
+        .physics-controls-container.collapsed {
+            max-height: 0;
+            padding: 0 20px;
+            opacity: 0;
+        }
+
+        .physics-control {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .physics-control label {
+            font-size: 11px;
+            color: #cccccc;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .physics-control input[type="range"] {
+            width: 80px;
+            height: 4px;
+            background: #555;
+            border-radius: 2px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .physics-control input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 12px;
+            height: 12px;
+            background: #00aaff;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .physics-control input[type="range"]::-webkit-slider-thumb:hover {
+            background: #0088cc;
+            transform: scale(1.2);
+        }
+
+        .physics-value {
+            font-size: 10px;
+            color: #00aaff;
+            font-weight: 600;
+            min-width: 30px;
+            text-align: center;
+        }
+        
+        .physics-note {
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            color: #888;
+            font-style: italic;
+            white-space: nowrap;
+        }
+        
+        .info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: #666;
+            font-size: 12px;
+            user-select: none;
+        }
+        
+        .preview-window {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 256px;
+            height: 256px;
+            background: rgba(30, 30, 30, 0.95);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            display: none;
+            flex-direction: column;
+            backdrop-filter: blur(10px);
+            user-select: none;
+            overflow: hidden;
+            min-width: 150px;
+            min-height: 150px;
+        }
+        
+        .preview-window:hover {
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .preview-header {
+            cursor: move;
+            user-select: none;
+        }
+        
+        /* Resize handles */
+        .resize-handle {
+            position: absolute;
+            background: transparent;
+            z-index: 10;
+        }
+        
+        .resize-handle:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .resize-handle.resize-n {
+            top: 0;
+            left: 10px;
+            right: 10px;
+            height: 10px;
+            cursor: n-resize;
+        }
+        
+        .resize-handle.resize-e {
+            right: 0;
+            top: 10px;
+            bottom: 10px;
+            width: 10px;
+            cursor: e-resize;
+        }
+        
+        .resize-handle.resize-s {
+            bottom: 0;
+            left: 10px;
+            right: 10px;
+            height: 10px;
+            cursor: s-resize;
+        }
+        
+        .resize-handle.resize-w {
+            left: 0;
+            top: 10px;
+            bottom: 10px;
+            width: 10px;
+            cursor: w-resize;
+        }
+        
+        .resize-handle.resize-nw {
+            top: 0;
+            left: 0;
+            width: 10px;
+            height: 10px;
+            cursor: nw-resize;
+        }
+        
+        .resize-handle.resize-ne {
+            top: 0;
+            right: 0;
+            width: 10px;
+            height: 10px;
+            cursor: ne-resize;
+        }
+        
+        .resize-handle.resize-sw {
+            bottom: 0;
+            left: 0;
+            width: 10px;
+            height: 10px;
+            cursor: sw-resize;
+        }
+        
+        .resize-handle.resize-se {
+            bottom: 0;
+            right: 0;
+            width: 10px;
+            height: 10px;
+            cursor: se-resize;
+        }
+        
+        .preview-window.active {
+            display: flex;
+        }
+        
+        .preview-header {
+            padding: 10px;
+            background: rgba(40, 40, 40, 0.8);
+            border-radius: 8px 8px 0 0;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .preview-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0 0 8px 8px;
+            overflow: hidden;
+        }
+        
+        /* Node Parameter Panel */
+        .node-parameter-panel {
+            position: absolute;
+            background: transparent;
+            padding: 8px 0;
+            z-index: 1000;
+            transition: opacity 0.2s ease;
+        }
+        
+        .parameter-control {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 8px;
+        }
+        
+        .parameter-dropdown {
+            width: 100%;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 3px;
+            color: #fff;
+            font-size: 10px;
+            padding: 0 5px;
+            cursor: pointer;
+            outline: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            text-align: center;
+        }
+        
+        .parameter-dropdown:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .parameter-control:last-child {
+            margin-bottom: 0;
+        }
+        
+        .parameter-label {
+            font-size: 9px;
+            color: #888;
+            font-weight: 400;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .parameter-slider {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            outline: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .parameter-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 0;
+            height: 0;
+            background: transparent;
+            border: none;
+        }
+        
+        .parameter-slider::-webkit-slider-track {
+            -webkit-appearance: none;
+            background: linear-gradient(to right, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.6) 50%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0.1) 100%);
+            border-radius: 3px;
+            height: 6px;
+        }
+        
+        .parameter-value {
+            font-size: 8px;
+            color: #666;
+            text-align: center;
+        }
+        
+        .parameter-value-display {
+            position: absolute;
+            top: -20px;
+            right: 0;
+            font-size: 8px;
+            color: rgba(255, 255, 255, 0.9);
+            background: rgba(0, 0, 0, 0.7);
+            padding: 2px 4px;
+            border-radius: 2px;
+            transition: opacity 0.2s ease;
+            pointer-events: none;
+        }
+        
+        .parameter-input {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            color: #fff;
+            background: rgba(40, 40, 40, 0.9);
+            border: none;
+            border-radius: 3px;
+            padding: 3px 6px;
+            width: 50px;
+            text-align: center;
+            outline: none;
+            -webkit-appearance: none;
+            -moz-appearance: textfield;
+        }
+        
+        .parameter-input::-webkit-outer-spin-button,
+        .parameter-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        
+        .parameter-input[type=number] {
+            -moz-appearance: textfield;
+        }
+        
+        .parameter-control {
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+    <div class="context-menu" id="contextMenu"></div>
+    <div class="info">
+        Right-click to create nodes • Drag to connect • Scroll to zoom • Middle-click to pan
+    </div>
+    <div class="preview-window" id="previewWindow">
+        <div class="preview-header" id="previewHeader">Node Output</div>
+        <div class="preview-content" id="previewContent"></div>
+        <!-- Resize handles -->
+        <div class="resize-handle resize-n"></div>
+        <div class="resize-handle resize-e"></div>
+        <div class="resize-handle resize-s"></div>
+        <div class="resize-handle resize-w"></div>
+        <div class="resize-handle resize-nw"></div>
+        <div class="resize-handle resize-ne"></div>
+        <div class="resize-handle resize-sw"></div>
+        <div class="resize-handle resize-se"></div>
+    </div>
+
+    <div class="color-panel">
+        <div class="color-header">
+            <span class="color-title">NODE COLORS</span>
+            <button class="color-toggle" id="colorToggle">▼</button>
+        </div>
+        <div class="color-controls-container" id="colorControlsContainer">
+            <!-- Palette Selector -->
+            <div class="palette-section" style="display: flex; align-items: center; gap: 8px;">
+                <select id="paletteSelector" style="width: 140px; padding: 4px 6px; background: #333; color: #fff; border: 1px solid #555; border-radius: 3px; font-size: 11px;">
+                    <option value="material">Material</option>
+                    <option value="tailwind">Tailwind</option>
+                    <option value="github">GitHub</option>
+                    <option value="notion">Notion</option>
+                    <option value="figma">Figma</option>
+                    <option value="apple">Apple</option>
+                    <option value="ibm">IBM</option>
+                    <option value="ant">Ant</option>
+                    <option value="slack">Slack</option>
+                    <option value="stripe">Stripe</option>
+                    <option value="vercel">Vercel</option>
+                    <option value="atlassian">Atlassian</option>
+                </select>
+            </div>
+            
+            <!-- Category Colors -->
+            <div class="category-colors">
+                <div class="category-list">
+                    <div class="category-item" data-category="GN">
+                        <input type="color" class="category-color-picker" id="colorGN" value="#4CAF50" title="Generators">
+                        <span class="category-label">GN</span>
+                    </div>
+                    <div class="category-item" data-category="CN">
+                        <input type="color" class="category-color-picker" id="colorCN" value="#2196F3" title="Constants">
+                        <span class="category-label">CN</span>
+                    </div>
+                    <div class="category-item" data-category="MN">
+                        <input type="color" class="category-color-picker" id="colorMN" value="#FF9800" title="Math">
+                        <span class="category-label">MN</span>
+                    </div>
+                    <div class="category-item" data-category="UN">
+                        <input type="color" class="category-color-picker" id="colorUN" value="#9C27B0" title="Utility">
+                        <span class="category-label">UN</span>
+                    </div>
+                    <div class="category-item" data-category="DN">
+                        <input type="color" class="category-color-picker" id="colorDN" value="#F44336" title="Deform">
+                        <span class="category-label">DN</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Interaction Colors -->
+            <div class="interaction-colors" style="display: flex; gap: 4px;">
+                <div class="category-item">
+                    <input type="color" class="category-color-picker" id="colorHover" value="#00FFFF" title="Hover">
+                    <span class="category-label">H</span>
+                </div>
+                <div class="category-item">
+                    <input type="color" class="category-color-picker" id="colorSelected" value="#FFFF00" title="Selected">
+                    <span class="category-label">S</span>
+                </div>
+            </div>
+            
+            <!-- Saturation Control -->
+            <div class="saturation-control" style="display: flex; align-items: center; gap: 3px;">
+                <span style="color: #888; font-size: 7px; min-width: 9px;">S:</span>
+                <input type="range" id="saturationSlider" min="0" max="100" value="100" style="width: 45px; height: 3px; background: linear-gradient(to right, #666, #ff0000); border-radius: 0px; outline: none; -webkit-appearance: none;">
+                <span id="saturationValue" style="color: #aaa; font-size: 7px; min-width: 22px;">100%</span>
+            </div>
+            
+
+            
+
+            
+            <!-- Reset Button -->
+            <button class="color-reset" id="colorReset" style="padding: 3px 6px; font-size: 7px;">Reset</button>
+        </div>
+    </div>
+
+    <div class="physics-panel">
+        <div class="physics-header">
+            <span class="physics-title">WIRE PHYSICS</span>
+            <button class="physics-toggle" id="physicsToggle">▼</button>
+        </div>
+        <div class="physics-controls-container" id="physicsControlsContainer">
+        <div class="physics-control">
+            <label>Min Stiffness (Long Wires)</label>
+            <input type="range" id="minStiffnessSlider" min="0.01" max="0.5" step="0.05" value="0.1">
+            <div class="physics-value" id="minStiffnessValue">0.1</div>
+        </div>
+        <div class="physics-control">
+            <label>Max Stiffness (Short Wires)</label>
+            <input type="range" id="maxStiffnessSlider" min="0.5" max="1.0" step="0.05" value="0.8">
+            <div class="physics-value" id="maxStiffnessValue">0.8</div>
+        </div>
+        <div class="physics-control">
+            <label>Stiffness Bias (Gradient Shape)</label>
+            <input type="range" id="stiffnessBiasSlider" min="0.1" max="8.0" step="0.1" value="0.25">
+            <div class="physics-value" id="stiffnessBiasValue">2.0</div>
+        </div>
+        <div class="physics-control">
+            <label>Damping</label>
+            <input type="range" id="dampingSlider" min="0.5" max="0.99" step="0.01" value="0.3">
+            <div class="physics-value" id="dampingValue">0.85</div>
+        </div>
+        <div class="physics-control">
+            <label>Gravity</label>
+            <input type="range" id="gravitySlider" min="0" max="10.0" step="0.1" value="2.5">
+            <div class="physics-value" id="gravityValue">0.5</div>
+        </div>
+        <div class="physics-control">
+            <label>Sag</label>
+            <input type="range" id="sagSlider" min="1" max="200" step="5" value="43">
+            <div class="physics-value" id="sagValue">20</div>
+        </div>
+        <div class="physics-control">
+            <label>Collision Strength</label>
+            <input type="range" id="collisionStrengthSlider" min="0" max="100" step="5" value="50">
+            <div class="physics-value" id="collisionStrengthValue">50</div>
+        </div>
+        <div class="physics-control">
+            <label>Collision Padding</label>
+            <input type="range" id="collisionPaddingSlider" min="0" max="100" step="5" value="20">
+            <div class="physics-value" id="collisionPaddingValue">20</div>
+        </div>
+        <div class="physics-control">
+            <label>Port Stiffness</label>
+            <input type="range" id="portStiffnessSlider" min="0.1" max="0.95" step="0.05" value="0.7">
+            <div class="physics-value" id="portStiffnessValue">0.7</div>
+        </div>
+        <div class="physics-control">
+            <label>Wire Points</label>
+            <input type="range" id="wirePointsSlider" min="4" max="20" step="1" value="12">
+            <div class="physics-value" id="wirePointsValue">12</div>
+        </div>
+        <div class="physics-note">Note: Wire Points only affects new wires</div>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.3.2/pixi.min.js"></script>
+    <script type="module">
+        import { allNodes } from './nodes/index.js';
+        import { webGPURenderer } from './webgpu/renderer.js';
+        import { ParameterSystem } from './parameterSystem.js';
+
+        // Initialize PIXI Application
+        const app = new PIXI.Application({
+            width: window.innerWidth,
+            height: window.innerHeight,
+            backgroundColor: 0x1a1a1a,
+            resolution: window.devicePixelRatio || 1,
+            autoDensity: true,
+            antialias: true,
+            roundPixels: true  // Ensures pixel-perfect rendering for sharp text
+        });
+        
+        // Make app globally available for parameter system
+        window.app = app;
+        window.parameterInteractionInProgress = false;
+        window.globalNodeTint = 0xffffff; // Default to white (no tint)
+        
+        document.getElementById('app').appendChild(app.view);
+        
+        // Container for the entire scene
+        const viewport = new PIXI.Container();
+        app.stage.addChild(viewport);
+        
+        // Separate containers for organization
+        const gridContainer = new PIXI.Container();
+        const wiresContainer = new PIXI.Container();
+        const nodesContainer = new PIXI.Container();
+        viewport.addChild(gridContainer);
+        viewport.addChild(wiresContainer);
+        viewport.addChild(nodesContainer);
+        
+        // Camera state
+        let camera = {
+            x: 0,
+            y: 0,
+            zoom: 1,
+            targetX: 0,
+            targetY: 0,
+            targetZoom: 1
+        };
+        
+        // Node types configuration
+        const nodeTypes = {};
+        
+        // Node storage
+        const nodes = [];
+        const wires = [];
+        
+        // Interaction state
+        let selectedNode = null;
+        let isDragging = false;
+        let isPanning = false;
+        let nodeInteractionInProgress = false;
+        let parameterInteractionInProgress = false;
+        let connectionStart = null;
+        let tempWire = null;
+        let hoveredValidPort = null;
+        let mouseX = 0;
+        let mouseY = 0;
+        let dragStart = { x: 0, y: 0 };
+        
+        // Preview textures
+        const previewTextures = {};
+        
+        // Create procedural textures for preview
+        function createNodeTexture(node, parameters = {}) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 256;
+            canvas.height = 256;
+            const ctx = canvas.getContext('2d');
+            
+            node.generateTexture(ctx, parameters);
+            
+            return PIXI.Texture.from(canvas);
+        }
+        
+        // Node configuration - moved before Node class definition
+        let nodeConfig = {
+            width: 720,
+            height: 720,
+            scale: 0.25,
+            bgColor: '#3a3a3a',
+            borderColor: '#2a2a2a',
+            headerColor: '#444444',
+            textColor: '#cccccc',
+            borderWidth: 2,
+            cornerRadius: 4,
+            sliceSize: 50,
+            portSize: 6,
+            portColor: '#666666',
+            portSpacing: 160,
+            portOffsetY: 100,
+            fontSize: 13,
+            fontFamily: 'JetBrains Mono',
+            labelX: 100,
+            labelY: 80,
+            hoverAlpha: 1,
+            selectionAlpha: 1,
+            fadeInSpeed: 0.2,
+            fadeOutSpeed: 0.15
+        };
+
+        // Load saved configuration from node editor
+        const savedConfig = localStorage.getItem('nodeEditorConfig');
+        if (savedConfig) {
+            Object.assign(nodeConfig, JSON.parse(savedConfig));
+            console.log('UI: Loaded node configuration from localStorage:', nodeConfig);
+        } else {
+            console.log('UI: No saved config found, using defaults:', nodeConfig);
+        }
+
+        // Initialize nodes
+        console.log('Initializing nodes from allNodes:', allNodes);
+        Object.values(allNodes).forEach(node => {
+            console.log('Registering node type:', node.type);
+            nodeTypes[node.type] = node;
+            previewTextures[node.type] = createNodeTexture(node);
+        });
+        console.log('nodeTypes after initialization:', nodeTypes);
+        
+        // Global textures variable
+        let textures = {};
+        
+        // Global physics variables
+        let wirePhysics = {
+            stiffness: 0.4, // DEPRECATED - now using minStiffness/maxStiffness
+            minStiffness: 0.1,
+            maxStiffness: 0.8,
+            stiffnessBias: 2.0, // Controls the shape of the stiffness gradient (1=linear, >1=sharper curve)
+            damping: 0.85,
+            gravity: 0.5,
+            sag: 20,
+            collisionStrength: 50,
+            collisionPadding: 20,
+            portStiffness: 0.7,
+            wirePoints: 12
+        };
+
+        // Wait for DOM to be ready before initializing
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                console.log('DOM loaded, starting initialization...');
+                console.log('Current nodeTypes:', nodeTypes);
+                
+                console.log('Loading textures...');
+                // Load textures globally
+                window.textures = textures = {
+                    nodeBase: await PIXI.Assets.load('./assets/node_base.png'),
+                    nodeHover: await PIXI.Assets.load('./assets/node_hover.png'),
+                    nodeSelected: await PIXI.Assets.load('./assets/node_selected.png'),
+                    portBase: await PIXI.Assets.load('./assets/port_base.png'),
+                    portHover: await PIXI.Assets.load('./assets/port_hover.png')
+                };
+                console.log('Textures loaded:', textures);
+
+                // Draw background grid
+                drawGrid();
+                console.log('Grid drawn');
+                
+                // Create some example nodes
+                console.log('Creating nodes...');
+                console.log('Available node types:', Object.keys(nodeTypes));
+                const noise1 = new Node('noise', -200, -100, textures);
+                const checker = new Node('checker', -200, 100, textures);
+                const blend = new Node('blend', 100, 0, textures);
+                const output = new Node('container', 400, 0, textures);
+                console.log('Nodes created:', { noise1, checker, blend, output });
+                
+                // Apply initial category colors
+                updateNodeCategoryColors();
+                
+                // Apply initial interaction colors
+                setTimeout(() => {
+                    updateInteractionColors();
+                }, 100);
+                
+                // Connect them
+                setTimeout(() => {
+                    console.log('Creating wires...');
+                    createWire(noise1.outputs[0], blend.inputs[0]);
+                    createWire(checker.outputs[0], blend.inputs[1]);
+                    createWire(blend.outputs[0], output.inputs[0]);
+                    console.log('Wires created');
+                }, 100);
+            } catch (error) {
+                console.error('Error during initialization:', error);
+            }
+        });
+
+        function drawGrid() {
+            gridContainer.removeChildren();
+            const gridSize = 50;
+            const graphics = new PIXI.Graphics();
+            
+            graphics.lineStyle(1, 0x2a2a2a, 0.5);
+            
+            const startX = -Math.ceil(app.screen.width / 2 / gridSize) * gridSize;
+            const endX = Math.ceil(app.screen.width / 2 / gridSize) * gridSize;
+            const startY = -Math.ceil(app.screen.height / 2 / gridSize) * gridSize;
+            const endY = Math.ceil(app.screen.height / 2 / gridSize) * gridSize;
+            
+            for (let x = startX; x <= endX; x += gridSize) {
+                graphics.moveTo(x, startY);
+                graphics.lineTo(x, endY);
+            }
+            
+            for (let y = startY; y <= endY; y += gridSize) {
+                graphics.moveTo(startX, y);
+                graphics.lineTo(endX, y);
+            }
+            
+            gridContainer.addChild(graphics);
+        }
+        
+        // Create node class
+        class Node {
+            constructor(type, x, y, textures) {
+                console.log('Creating node:', type, 'at', x, y, 'nodeTypes:', Object.keys(nodeTypes));
+                this.type = type;
+                this.config = nodeTypes[type];
+                if (!this.config) {
+                    console.error('Node type not found:', type, 'Available types:', Object.keys(nodeTypes));
+                    throw new Error(`Node type '${type}' not found`);
+                }
+                this.x = x;
+                this.y = y;
+                this.width = this.config.width || nodeConfig.width;
+                this.height = this.config.height || nodeConfig.height;
+                this.inputs = [];
+                this.outputs = [];
+                this.connections = [];
+                this.selected = false;
+                this.parameters = {}; // Store node parameters
+                this.outputTexture = null; // Store this node's output texture
+                
+                // Initialize parameter system
+                console.log('Creating ParameterSystem for node type:', this.type, 'config:', this.config);
+                this.parameterSystem = new ParameterSystem(this, nodeConfig);
+                console.log('ParameterSystem created:', this.parameterSystem);
+                
+                this.container = new PIXI.Container();
+                this.container.x = x;
+                this.container.y = y;
+                this.container.interactive = true;
+                this.container.eventMode = 'static'; // Ensures events work properly
+                this.container.cursor = 'pointer';
+                this.container.interactiveChildren = true; // Allow children to receive events
+                // Expand hitArea to include parameter panel area below the node
+                const parameterHeight = 80; // Space for parameters below
+                this.container.hitArea = new PIXI.Rectangle(0, 0, this.width * nodeConfig.scale, this.height * nodeConfig.scale + parameterHeight);
+                
+
+
+                const sliceSize = nodeConfig.sliceSize;
+
+                this.baseSprite = new PIXI.NineSlicePlane(textures.nodeBase, sliceSize, sliceSize, sliceSize, sliceSize);
+                this.baseSprite.width = this.width;
+                this.baseSprite.height = this.height;
+                this.baseSprite.scale.set(nodeConfig.scale);
+                this.baseSprite.eventMode = 'none'; // Don't block parameter events
+                
+                // Apply color based on category and global tint
+                updateNodeColor(this);
+
+                this.hoverOutline = new PIXI.NineSlicePlane(textures.nodeHover, sliceSize, sliceSize, sliceSize, sliceSize);
+                this.hoverOutline.width = this.width;
+                this.hoverOutline.height = this.height;
+                this.hoverOutline.scale.set(nodeConfig.scale);
+                this.hoverOutline.alpha = 0;
+                this.hoverOutline.targetAlpha = 0;
+                this.hoverOutline.animationSpeed = 0.1;
+                this.hoverOutline.eventMode = 'none'; // Don't block parameter events
+
+                this.selectionOutline = new PIXI.NineSlicePlane(textures.nodeSelected, sliceSize, sliceSize, sliceSize, sliceSize);
+                this.selectionOutline.width = this.width;
+                this.selectionOutline.height = this.height;
+                this.selectionOutline.scale.set(nodeConfig.scale);
+                this.selectionOutline.alpha = 0;
+                this.selectionOutline.targetAlpha = 0;
+                this.selectionOutline.animationSpeed = 0.1;
+                this.selectionOutline.eventMode = 'none'; // Don't block parameter events
+                
+                this.draw();
+                this.setupInteraction();
+                
+
+                
+                this.parameterSystem.createParameterPanel();
+                
+                nodesContainer.addChild(this.container);
+                nodes.push(this);
+                
+                // Generate initial output texture
+                this.updateNodeTexture();
+            }
+            
+            update() {
+                // Animate hover outline
+                if (this.hoverOutline.alpha !== this.hoverOutline.targetAlpha) {
+                    const diff = this.hoverOutline.targetAlpha - this.hoverOutline.alpha;
+                    if (Math.abs(diff) < 0.01) {
+                        this.hoverOutline.alpha = this.hoverOutline.targetAlpha;
+                    } else {
+                        this.hoverOutline.alpha += diff * this.hoverOutline.animationSpeed;
+                    }
+                }
+                // Animate selection outline
+                if (this.selectionOutline.alpha !== this.selectionOutline.targetAlpha) {
+                    const diff = this.selectionOutline.targetAlpha - this.selectionOutline.alpha;
+                    if (Math.abs(diff) < 0.01) {
+                        this.selectionOutline.alpha = this.selectionOutline.targetAlpha;
+                    } else {
+                        this.selectionOutline.alpha += diff * this.selectionOutline.animationSpeed;
+                    }
+                }
+                // Update parameter system
+                this.parameterSystem.update();
+            }
+
+            draw() {
+                this.container.addChild(this.baseSprite);
+                this.container.addChild(this.hoverOutline);
+                this.container.addChild(this.selectionOutline);
+                
+
+
+                // Add thumbnail preview in the center of the node
+                if (previewTextures[this.type]) {
+                    const thumbnail = new PIXI.Sprite(previewTextures[this.type]);
+                    const thumbnailSize = Math.min(this.width * 0.66, this.height * 0.66) * nodeConfig.scale;
+                    thumbnail.width = thumbnailSize;
+                    thumbnail.height = thumbnailSize;
+                    thumbnail.x = (this.width * nodeConfig.scale) / 2;
+                    thumbnail.y = (this.height * nodeConfig.scale) / 2;
+                    thumbnail.anchor.set(0.5);
+                    thumbnail.alpha = 0.8; // Slightly transparent so it doesn't overwhelm
+                    thumbnail.eventMode = 'none'; // Don't block parameter events
+                    this.container.addChild(thumbnail);
+                }
+                
+                // Input ports
+                
+                if (this.config.inputs) {
+                    this.config.inputs.forEach((input, i) => {
+                        // Use loaded port texture
+                        const port = new PIXI.Sprite(textures.portBase);
+                        port.anchor.set(0.5, 0.5); // Center anchor
+                        port.scale.x = -.75; // Flip horizontally for input ports
+                        port.scale.y = .75; // Flip horizontally for input ports
+
+                        port.x = -1; // Position on left edge, slightly outside
+                        // Center ports vertically and space them evenly
+                        const totalPorts = this.config.inputs.length;
+                        const centerY = this.height / 2;
+                        if (totalPorts === 1) {
+                            port.y = centerY * nodeConfig.scale;
+                        } else {
+                            const totalSpacing = (totalPorts - 1) * nodeConfig.portSpacing;
+                            const startY = centerY - (totalSpacing / 2);
+                            port.y = (startY + i * nodeConfig.portSpacing) * nodeConfig.scale;
+                        }
+                        port.interactive = true;
+                        port.cursor = 'pointer';
+                        port.portType = 'input';
+                        port.portIndex = i;
+                        port.node = this;
+                        port.connected = false;
+
+                        // Larger hit area for easier interaction
+                        port.hitArea = new PIXI.Rectangle(-30, -30,     40, 40);
+                        
+                        // Create glow effect
+                        const glowGraphics = new PIXI.Graphics();
+                        glowGraphics.beginFill(0xff6600, 0.3); // Orange glow
+                        glowGraphics.drawCircle(0, 0, 15);
+                        glowGraphics.endFill();
+                        glowGraphics.filters = [new PIXI.BlurFilter(10)];
+                        glowGraphics.alpha = 0;
+                        glowGraphics.x = port.x;
+                        glowGraphics.y = port.y;
+                        port.glow = glowGraphics;
+                        
+                        this.container.addChild(glowGraphics);
+                        this.container.addChild(port);
+
+                        this.inputs.push(port);
+                        
+
+                    });
+                }
+                
+                // Output ports
+                if (this.config.outputs) {
+                    this.config.outputs.forEach((output, i) => {
+                        // Use loaded port texture
+                        const port = new PIXI.Sprite(textures.portBase);
+                        port.anchor.set(0.5, 0.5); // Center anchor
+                        port.scale.x = 0.75;
+                        port.scale.y = 0.75;
+                        port.x = this.width * nodeConfig.scale - 5; // Position on right edge, slightly outside
+                        // Center ports vertically and space them evenly
+                        const totalPorts = this.config.outputs.length;
+                        const centerY = this.height / 2;
+                        if (totalPorts === 1) {
+                            port.y = centerY * nodeConfig.scale;
+                        } else {
+                            const totalSpacing = (totalPorts - 1) * nodeConfig.portSpacing;
+                            const startY = centerY - (totalSpacing / 2);
+                            port.y = (startY + i * nodeConfig.portSpacing) * nodeConfig.scale;
+                        }
+                        port.interactive = true;
+                        port.cursor = 'pointer';
+                        port.portType = 'output';
+                        port.portIndex = i;
+                        port.node = this;
+                        port.connected = false;
+
+                        // Larger hit area for easier interaction
+                        port.hitArea = new PIXI.Rectangle(-20, -20, 40, 40);
+                        
+                        // Create glow effect
+                        const glowGraphics = new PIXI.Graphics();
+                        glowGraphics.beginFill(0xff6600, 0.3); // Orange glow
+                        glowGraphics.drawCircle(0, 0, 15);
+                        glowGraphics.endFill();
+                        glowGraphics.filters = [new PIXI.BlurFilter(10)];
+                        glowGraphics.alpha = 0;
+                        glowGraphics.x = port.x;
+                        glowGraphics.y = port.y;
+                        port.glow = glowGraphics;
+                        
+                        this.container.addChild(glowGraphics);
+                        this.container.addChild(port);
+                        
+                        this.outputs.push(port);
+                        
+
+                    });
+                }
+                
+                // Add top label for the node (all caps)
+                this.topLabel = new PIXI.Text(this.config.name.toUpperCase(), {
+                    fontFamily: nodeConfig.fontFamily,
+                    fontSize: nodeConfig.fontSize,
+                    fontWeight: '500',
+                    fill: parseInt(nodeConfig.textColor.replace('#', '0x')),
+                    resolution: 2  // Higher resolution for sharper text
+                });
+                this.topLabel.scale.set(0.8);  // Scale to 80%
+                this.topLabel.x = nodeConfig.labelX * nodeConfig.scale;
+                this.topLabel.y = (nodeConfig.labelY * nodeConfig.scale) - 5;
+                this.topLabel.anchor.set(0, 0.5);
+                this.container.addChild(this.topLabel);
+            }
+            
+            setSelected(selected) {
+                this.selected = selected;
+                
+                if (selected) {
+                    this.selectionOutline.targetAlpha = nodeConfig.selectionAlpha;
+                    this.selectionOutline.animationSpeed = nodeConfig.fadeInSpeed;
+                    
+                    // Hide hover outline when selected
+                    this.hoverOutline.targetAlpha = 0;
+                    this.hoverOutline.animationSpeed = nodeConfig.fadeOutSpeed;
+                    
+                    // Show parameter panel
+                    this.parameterSystem.showParameterPanel();
+                    
+                    // Show preview
+                    const preview = document.getElementById('previewWindow');
+                    const header = document.getElementById('previewHeader');
+                    const content = document.getElementById('previewContent');
+                    
+                    preview.classList.add('active');
+                    header.textContent = `${this.config.name} Output`;
+                    
+                    // Clear previous content
+                    content.innerHTML = '';
+                    
+                    // Add preview image
+                    const img = document.createElement('img');
+                    img.src = previewTextures[this.type].baseTexture.resource.source.toDataURL();
+                    img.style.width = '100%';
+                    img.style.height = '100%';
+                    img.style.objectFit = 'contain';
+                    content.appendChild(img);
+                } else {
+                    this.selectionOutline.targetAlpha = 0;
+                    this.selectionOutline.animationSpeed = nodeConfig.fadeOutSpeed;
+                    
+                    // Reset hover outline when deselecting
+                    this.hoverOutline.targetAlpha = 0;
+                    this.hoverOutline.animationSpeed = nodeConfig.fadeOutSpeed;
+                    
+                    // Hide parameter panel
+                    this.parameterSystem.hideParameterPanel();
+                    
+                    // Hide preview if this was the selected node
+                     if (selectedNode === this) {
+                         document.getElementById('previewWindow').classList.remove('active');
+                     }
+                }
+            }
+
+
+
+
+            
+            async updateNodeTexture() {
+                // Check if node has process function for actual input processing
+                if (this.config.process && this.hasConnectedInputs()) {
+                    // Get input canvases
+                    const inputs = await this.getInputCanvases();
+                    
+                    // Process with WebGPU if available
+                    const outputCanvas = await this.config.process(inputs, this.parameters, webGPURenderer);
+                    
+                    if (outputCanvas) {
+                        // Create texture from processed output
+                        const newTexture = PIXI.Texture.from(outputCanvas);
+                        this.outputTexture = newTexture; // Store on this node instance
+                        
+                        // Update thumbnail
+                        const thumbnail = this.container.children.find(child => child instanceof PIXI.Sprite);
+                        if (thumbnail) {
+                            thumbnail.texture = newTexture;
+                        }
+                        
+                        // Update preview window
+                        if (this.selected) {
+                            this.updatePreviewWindow(outputCanvas);
+                        }
+                        
+                        return;
+                    }
+                }
+                
+                // Fallback to default texture generation (no inputs connected)
+                const newTexture = createNodeTexture(this.config, this.parameters);
+                this.outputTexture = newTexture; // Store on this node instance
+                
+                // Update the node's thumbnail if it exists
+                const thumbnail = this.container.children.find(child => child instanceof PIXI.Sprite);
+                if (thumbnail) {
+                    thumbnail.texture = newTexture;
+                }
+                
+                // Update preview window if this node is selected
+                if (this.selected) {
+                    const preview = document.getElementById('previewWindow');
+                    const content = document.getElementById('previewContent');
+                    if (preview.classList.contains('active') && content) {
+                        content.innerHTML = '';
+                        const img = document.createElement('img');
+                        img.src = newTexture.baseTexture.resource.source.toDataURL();
+                        img.style.width = '100%';
+                        img.style.height = '100%';
+                        img.style.objectFit = 'contain';
+                        content.appendChild(img);
+                     }
+                }
+                
+                // Update any nodes that depend on this one
+                this.updateDependentNodes();
+            }
+            
+            updateDependentNodes() {
+                // Find all nodes that have this node as input
+                this.connections.forEach(conn => {
+                    if (conn.wire && conn.port.portType === 'output') {
+                        // Find the node on the other end
+                        const targetNode = conn.wire.endPort.node;
+                        if (targetNode && targetNode !== this) {
+                            // Update that node's texture
+                            setTimeout(() => targetNode.updateNodeTexture(), 0);
+                        }
+                    }
+                });
+            }
+            
+            hasConnectedInputs() {
+                // Check if any inputs are connected
+                if (!this.config.inputs) return false;
+                
+                for (let input of this.inputs) {
+                    if (input.connected) return true;
+                }
+                return false;
+            }
+            
+            async getInputCanvases() {
+                const inputs = {};
+                
+                // For each input port, get the connected node's output
+                for (let i = 0; i < this.inputs.length; i++) {
+                    const port = this.inputs[i];
+                    const inputName = this.config.inputs[i];
+                    
+                    if (port.connected) {
+                        // Find the wire connected to this port
+                        const connection = this.connections.find(conn => conn.port === port);
+                        if (connection && connection.wire) {
+                            // Find the actual source node (could be from either end of wire)
+                            let sourceNode = null;
+                            if (connection.wire.startPort === port) {
+                                sourceNode = connection.wire.endPort.node;
+                            } else {
+                                sourceNode = connection.wire.startPort.node;
+                            }
+                            
+                            // Get source node's output texture
+                            const sourceTexture = sourceNode.outputTexture;
+                            if (sourceTexture && sourceTexture.baseTexture && sourceTexture.baseTexture.resource) {
+                                const canvas = document.createElement('canvas');
+                                canvas.width = 256;
+                                canvas.height = 256;
+                                const ctx = canvas.getContext('2d');
+                                
+                                try {
+                                    ctx.drawImage(sourceTexture.baseTexture.resource.source, 0, 0);
+                                    inputs[inputName] = canvas;
+                                    console.log(`Got input ${inputName} from node ${sourceNode.type}`);
+                                } catch (e) {
+                                    console.error('Error getting input canvas:', e);
+                                }
+                            } else {
+                                console.warn(`No output texture for ${inputName} from node ${sourceNode.type}`);
+                            }
+                        }
+                    }
+                }
+                
+                return inputs;
+            }
+            
+            updatePreviewWindow(canvas) {
+                const preview = document.getElementById('previewWindow');
+                const content = document.getElementById('previewContent');
+                if (preview.classList.contains('active') && content) {
+                    content.innerHTML = '';
+                    const img = document.createElement('img');
+                    img.src = canvas.toDataURL();
+                    img.style.width = '100%';
+                    img.style.height = '100%';
+                    img.style.objectFit = 'contain';
+                    content.appendChild(img);
+                }
+            }
+            
+            setupInteraction() {
+                this.container.on('pointerdown', (e) => {
+                    if (e.data.button === 0) {
+                        onDragStart(e, this);
+                    }
+                });
+
+                this.container.on('pointerover', () => {
+                    if (!this.selected) {
+                        this.hoverOutline.targetAlpha = nodeConfig.hoverAlpha;
+                        this.hoverOutline.animationSpeed = nodeConfig.fadeInSpeed;
+                    }
+                });
+
+                this.container.on('pointerout', () => {
+                    if (!this.selected) {
+                        this.hoverOutline.targetAlpha = 0;
+                        this.hoverOutline.animationSpeed = nodeConfig.fadeOutSpeed;
+                    }
+                });
+                
+                // Port interactions
+                [...this.inputs, ...this.outputs].forEach(port => {
+                    port.on('pointerdown', (e) => {
+                        e.stopPropagation();
+                        if (port.portType === 'output') {
+                            // Clear any existing wire hover states when starting connection
+                            wires.forEach(wire => {
+                                if (wire.hovered) {
+                                    wire.hovered = false;
+                                    wire.draw();
+                                }
+                            });
+                            
+                            connectionStart = port;
+                            createTempWire();
+                        }
+                    });
+                    
+                    port.on('pointerup', (e) => {
+                        e.stopPropagation();
+                        if (connectionStart && port.portType === 'input' && connectionStart.node !== port.node) {
+                            createWire(connectionStart, port);
+                        }
+                    });
+                    
+                    // Port hover effects with glow
+                    port.on('pointerover', (e) => {
+                        e.stopPropagation();
+                        port.alpha = 1.0; // Full opacity on hover
+                        
+                        // Check if this is a valid drop target during wire dragging
+                        if (connectionStart && port.portType === 'input' && connectionStart.node !== port.node) {
+                            hoveredValidPort = port;
+                            port.isValidDropTarget = true;
+                            // Strong glow for valid drop target
+                            if (port.glow) {
+                                port.glowTween = { target: 1.5, speed: 0.2 };
+                            }
+                        } else {
+                            // Normal hover glow
+                            if (port.glow) {
+                                port.glowTween = { target: 1, speed: 0.1 };
+                            }
+                        }
+                    });
+                    
+                    port.on('pointerout', (e) => {
+                        e.stopPropagation();
+                        // Connected ports are dimmer
+                        port.alpha = port.connected ? 0.6 : 0.8;
+                        
+                        if (port === hoveredValidPort) {
+                            hoveredValidPort = null;
+                            port.isValidDropTarget = false;
+                        }
+                        
+                        // Animate glow out
+                        if (port.glow) {
+                            port.glowTween = { target: 0, speed: 0.1 };
+                        }
+                    });
+                    
+                    // Set initial alpha based on connection state
+                    port.alpha = port.connected ? 0.6 : 0.8;
+                });
+            }
+            
+            getPortGlobalPos(port) {
+                return {
+                    x: this.container.x + port.x,
+                    y: this.container.y + port.y
+                };
+            }
+            
+            update() {
+                // Update hover outline alpha animation
+                if (this.hoverOutline.targetAlpha !== undefined) {
+                    const diff = this.hoverOutline.targetAlpha - this.hoverOutline.alpha;
+                    if (Math.abs(diff) > 0.01) {
+                        this.hoverOutline.alpha += diff * this.hoverOutline.animationSpeed;
+                    } else {
+                        this.hoverOutline.alpha = this.hoverOutline.targetAlpha;
+                    }
+                }
+                
+                // Update selection outline alpha animation
+                if (this.selectionOutline.targetAlpha !== undefined) {
+                    const diff = this.selectionOutline.targetAlpha - this.selectionOutline.alpha;
+                    if (Math.abs(diff) > 0.01) {
+                        this.selectionOutline.alpha += diff * this.selectionOutline.animationSpeed;
+                    } else {
+                        this.selectionOutline.alpha = this.selectionOutline.targetAlpha;
+                    }
+                }
+                
+                // Update port glow animations
+                [...this.inputs, ...this.outputs].forEach(port => {
+                    if (port.glow && port.glowTween) {
+                        const diff = port.glowTween.target - port.glow.alpha;
+                        if (Math.abs(diff) > 0.01) {
+                            port.glow.alpha += diff * port.glowTween.speed;
+                        } else {
+                            port.glow.alpha = port.glowTween.target;
+                        }
+                    }
+                });
+            }
+        }
+        
+        // Store the active drag data
+        let activeDrag = null;
+        
+        function onDragStart(event, node) {
+            nodeInteractionInProgress = true;
+            
+            // Deselect previous node
+            if (selectedNode && selectedNode !== node) {
+                selectedNode.setSelected(false);
+            }
+            selectedNode = node;
+            selectedNode.setSelected(true);
+
+            const worldPos = {
+                x: (event.data.global.x - app.screen.width / 2) / camera.zoom + camera.x,
+                y: (event.data.global.y - app.screen.height / 2) / camera.zoom + camera.y
+            };
+
+            // Store all drag data
+            activeDrag = {
+                node: node,
+                pointerId: event.data.pointerId,
+                offset: {
+                    x: worldPos.x - node.container.x,
+                    y: worldPos.y - node.container.y
+                },
+                startX: event.data.global.x,
+                startY: event.data.global.y,
+                isDragging: false
+            };
+
+            // Use global stage events for reliable tracking
+            app.stage.interactive = true;
+            app.stage.eventMode = 'static';
+            app.stage.on('globalpointermove', onDragMove);
+            app.stage.on('pointerup', onDragEnd);
+            app.stage.on('pointerupoutside', onDragEnd);
+            
+            // Prevent event propagation
+            event.stopPropagation();
+        }
+
+        function onDragMove(event) {
+            if (!activeDrag || event.data.pointerId !== activeDrag.pointerId) return;
+            
+            // Start dragging immediately without threshold
+            if (!activeDrag.isDragging) {
+                activeDrag.isDragging = true;
+                        isDragging = true;
+            }
+            
+            // Position updates are handled in the ticker for smoother movement
+        }
+
+        function onDragEnd(event) {
+            if (!activeDrag || event.data.pointerId !== activeDrag.pointerId) return;
+            
+            // Clean up event listeners
+            app.stage.off('globalpointermove', onDragMove);
+            app.stage.off('pointerup', onDragEnd);
+            app.stage.off('pointerupoutside', onDragEnd);
+            app.stage.interactive = false;
+            
+            // Reset drag state
+            activeDrag = null;
+            isDragging = false;
+            setTimeout(() => { nodeInteractionInProgress = false; }, 0);
+        }
+        
+        class Wire {
+            constructor(startPort, endPort) {
+                this.startPort = startPort;
+                this.endPort = endPort;
+                this.graphics = new PIXI.Graphics();
+                this.points = [];
+                this.velocities = [];
+                this.selected = false;
+                this.hovered = false;
+                
+                // Initialize physics points - configurable for performance/quality
+                const numPoints = wirePhysics.wirePoints;
+                const start = startPort.node.getPortGlobalPos(startPort);
+                const end = endPort.node.getPortGlobalPos(endPort);
+                
+                for (let i = 0; i < numPoints; i++) {
+                    const t = i / (numPoints - 1);
+                    this.points.push({
+                        x: start.x + (end.x - start.x) * t,
+                        y: start.y + (end.y - start.y) * t
+                    });
+                    this.velocities.push({ x: 0, y: 0 });
+                }
+                
+                // Make wire interactive
+                this.graphics.interactive = true;
+                this.graphics.cursor = 'pointer';
+                this.graphics.hitArea = new PIXI.Rectangle(-10, -10, 20, 20); // Initial hit area
+                
+                // Wire interaction handlers
+                this.graphics.on('pointerover', () => {
+                    // Don't allow hover when dragging a wire connection
+                    if (connectionStart) return;
+                    
+                    this.hovered = true;
+                    this.draw();
+                });
+                
+                this.graphics.on('pointerout', () => {
+                    // Don't allow hover when dragging a wire connection
+                    if (connectionStart) return;
+                    
+                    this.hovered = false;
+                    this.draw();
+                });
+                
+                this.graphics.on('pointerdown', (e) => {
+                    e.stopPropagation();
+                    // Deselect all other wires
+                    wires.forEach(w => {
+                        if (w !== this && w.selected) {
+                            w.selected = false;
+                            w.graphics.filters = null; // Remove glow
+                            if (w.glowGraphics) {
+                                w.glowGraphics.visible = false;
+                            }
+                            w.draw();
+                        }
+                    });
+                    // Toggle selection
+                    this.selected = !this.selected;
+                    
+                    // Add or remove glow filter
+                    if (this.selected) {
+                        // Create a glow container for additive blending
+                        if (!this.glowGraphics) {
+                            this.glowGraphics = new PIXI.Graphics();
+                            this.glowGraphics.blendMode = PIXI.BLEND_MODES.ADD;
+                            wiresContainer.addChildAt(this.glowGraphics, wiresContainer.getChildIndex(this.graphics));
+                        }
+                        
+                        const glowFilter = new PIXI.BlurFilter();
+                        glowFilter.blur = 12;
+                        glowFilter.quality = 4;
+                        this.glowGraphics.filters = [glowFilter];
+                        this.glowGraphics.visible = true;
+                    } else {
+                        this.graphics.filters = null;
+                        if (this.glowGraphics) {
+                            this.glowGraphics.visible = false;
+                        }
+                    }
+                    
+                    this.draw();
+                });
+                
+                wiresContainer.addChild(this.graphics);
+                wires.push(this);
+            }
+            
+            update() {
+                const start = this.startPort.node.getPortGlobalPos(this.startPort);
+                const end = this.endPort.node.getPortGlobalPos(this.endPort);
+                
+                // Always pin endpoints
+                this.points[0].x = start.x;
+                this.points[0].y = start.y;
+                this.points[this.points.length - 1].x = end.x;
+                this.points[this.points.length - 1].y = end.y;
+                
+                // Calculate wire length
+                const dx = end.x - start.x;
+                const dy = end.y - start.y;
+                const wireLength = Math.sqrt(dx * dx + dy * dy);
+                
+                // Calculate length-based stiffness (shorter wires are stiffer)
+                const minLength = 100;
+                const maxLength = 500;
+                const normalizedLength = Math.max(0, Math.min(1, (wireLength - minLength) / (maxLength - minLength)));
+                
+                // Interpolate between min and max stiffness based on wire length
+                const minStiffness = wirePhysics.minStiffness;
+                const maxStiffness = wirePhysics.maxStiffness;
+                const baseStiffness = maxStiffness - (maxStiffness - minStiffness) * normalizedLength;
+                
+                // Debug: Log values occasionally to verify they're changing
+                if (Math.random() < 0.001) {
+                    console.log('Wire stiffness:', { minStiffness, maxStiffness, baseStiffness, wireLength, normalizedLength });
+                }
+                
+                // Use global physics settings
+                const damping = wirePhysics.damping;
+                const gravity = wirePhysics.gravity;
+                
+                // First, check which nodes the wire needs to avoid
+                const avoidanceForces = this.calculateAvoidanceForces();
+                
+                // Calculate horizontal distance for flat segments
+                const horizontalDistance = Math.abs(end.x - start.x);
+                const flatSegmentLength = Math.min(Math.max(horizontalDistance * 0.15, 30), 60); // 15% of distance or 30-60px
+                
+                // Direction of flat segments based on port type
+                // Output ports always go right, input ports always go left
+                const startDir = 1; // Output port direction (rightward)
+                const endDir = -1; // Input port direction (leftward)
+                
+                for (let i = 1; i < this.points.length - 1; i++) {
+                    const t = i / (this.points.length - 1);
+                    
+                    // All points use full physics now - no rigid points
+                    
+                    // Calculate rest position
+                    const restX = start.x + (end.x - start.x) * t;
+                    const restY = start.y + (end.y - start.y) * t + gravity * Math.sin(t * Math.PI) * wirePhysics.sag;
+                    
+                    // Spring force to rest position
+                    const dx = restX - this.points[i].x;
+                    const dy = restY - this.points[i].y;
+                    
+                    // Create a mirrored stiffness gradient (stronger at ends, weaker in middle)
+                    const distFromEnds = Math.min(t, 1 - t) * 2; // 0 at ends, 1 at center
+                    const bias = wirePhysics.stiffnessBias;
+                    const stiffnessGradient = Math.pow(1 - distFromEnds, bias); // Inverted: 1 at ends, 0 at center
+                    
+                    // Interpolate between baseStiffness (center) and a higher value (ends)
+                    const endStiffness = Math.min(1.0, baseStiffness * 2); // Stiffer at the ends
+                    const localStiffness = baseStiffness + (endStiffness - baseStiffness) * stiffnessGradient;
+                    
+                    // Add extra horizontal bias for the first/last few points to encourage flat exits
+                    if (i <= 2) {
+                        // Near start port - add horizontal tendency
+                        const horizontalBias = (1 - i / 3) * 0.3; // Stronger for closer points
+                        this.velocities[i].x += (start.x + 30 * startDir - this.points[i].x) * horizontalBias;
+                        this.velocities[i].y += (start.y - this.points[i].y) * horizontalBias * 0.5;
+                    } else if (i >= this.points.length - 3) {
+                        // Near end port - add horizontal tendency
+                        const fromEnd = this.points.length - 1 - i;
+                        const horizontalBias = (1 - fromEnd / 3) * 0.3;
+                        this.velocities[i].x += (end.x + 30 * endDir - this.points[i].x) * horizontalBias;
+                        this.velocities[i].y += (end.y - this.points[i].y) * horizontalBias * 0.5;
+                    }
+                    
+                    this.velocities[i].x += dx * localStiffness;
+                    this.velocities[i].y += dy * localStiffness;
+                    
+                    // Apply avoidance forces
+                    if (avoidanceForces[i]) {
+                        this.velocities[i].x += avoidanceForces[i].x;
+                        this.velocities[i].y += avoidanceForces[i].y;
+                    }
+                    
+                    // Damping
+                    this.velocities[i].x *= damping;
+                    this.velocities[i].y *= damping;
+                    
+                    // Update position
+                    this.points[i].x += this.velocities[i].x;
+                    this.points[i].y += this.velocities[i].y;
+                }
+                
+                this.draw();
+            }
+            
+            calculateAvoidanceForces() {
+                const forces = {};
+                const padding = wirePhysics.collisionPadding;
+                
+                // Check each segment of the wire for intersection with nodes
+                for (let i = 0; i < this.points.length - 1; i++) {
+                    const p1 = this.points[i];
+                    const p2 = this.points[i + 1];
+                    
+                    for (let node of nodes) {
+                        // Skip connected nodes
+                        if (node === this.startPort.node || node === this.endPort.node) continue;
+                        
+                        // Calculate node bounds with padding
+                        const nodeLeft = node.container.x - padding;
+                        const nodeRight = node.container.x + node.width * nodeConfig.scale + padding;
+                        const nodeTop = node.container.y - padding;
+                        const nodeBottom = node.container.y + node.height * nodeConfig.scale + padding;
+                        const nodeCenterX = (nodeLeft + nodeRight) / 2;
+                        const nodeCenterY = (nodeTop + nodeBottom) / 2;
+                        
+                        // Check if line segment intersects with node bounds
+                        if (this.lineIntersectsRect(p1, p2, nodeLeft, nodeTop, nodeRight, nodeBottom)) {
+                            // Calculate avoidance direction based on which side of the node to go around
+                            const wireAngle = Math.atan2(p2.y - p1.y, p2.x - p1.x);
+                            const nodeAngle = Math.atan2(nodeCenterY - p1.y, nodeCenterX - p1.x);
+                            let angleDiff = wireAngle - nodeAngle;
+                            
+                            // Normalize angle difference
+                            while (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
+                            while (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
+                            
+                            // Determine which side to avoid to
+                            const avoidLeft = angleDiff > 0;
+                            
+                            // Apply forces to points near the node
+                            for (let j = Math.max(0, i - 1); j <= Math.min(this.points.length - 1, i + 2); j++) {
+                                if (j === 0 || j === this.points.length - 1) continue;
+                                
+                                // Skip only the very first and last points (which are fixed at ports)
+                                // All other points can be affected by collision
+                                
+                                const point = this.points[j];
+                                const dx = point.x - nodeCenterX;
+                                const dy = point.y - nodeCenterY;
+                                const dist = Math.sqrt(dx * dx + dy * dy);
+                                
+                                if (dist < Math.sqrt(Math.pow(node.width * nodeConfig.scale / 2, 2) + 
+                                                   Math.pow(node.height * nodeConfig.scale / 2, 2)) + padding * 2) {
+                                    
+                                    // Calculate force magnitude based on proximity
+                                    const nodeRadius = Math.sqrt(Math.pow(node.width * nodeConfig.scale / 2, 2) + 
+                                                               Math.pow(node.height * nodeConfig.scale / 2, 2)) + padding;
+                                    
+                                    // Smoother force falloff for more stable collision
+                                    const normalizedDist = dist / nodeRadius;
+                                    const forceMag = Math.max(0, Math.pow(1 - normalizedDist, 2)) * wirePhysics.collisionStrength;
+                                    
+                                    if (!forces[j]) forces[j] = { x: 0, y: 0 };
+                                    
+                                    // Use only radial forces (push away from node) for more stable behavior
+                                    const radialX = dx / dist;  // Normalized direction away from node center
+                                    const radialY = dy / dist;
+                                    
+                                    forces[j].x += radialX * forceMag;
+                                    forces[j].y += radialY * forceMag;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                return forces;
+            }
+            
+            lineIntersectsRect(p1, p2, left, top, right, bottom) {
+                // Check if line segment intersects rectangle
+                // First check if either endpoint is inside
+                if ((p1.x >= left && p1.x <= right && p1.y >= top && p1.y <= bottom) ||
+                    (p2.x >= left && p2.x <= right && p2.y >= top && p2.y <= bottom)) {
+                    return true;
+                }
+                
+                // Check intersection with each edge
+                return this.lineIntersectsLine(p1, p2, {x: left, y: top}, {x: right, y: top}) ||
+                       this.lineIntersectsLine(p1, p2, {x: right, y: top}, {x: right, y: bottom}) ||
+                       this.lineIntersectsLine(p1, p2, {x: right, y: bottom}, {x: left, y: bottom}) ||
+                       this.lineIntersectsLine(p1, p2, {x: left, y: bottom}, {x: left, y: top});
+            }
+            
+            lineIntersectsLine(p1, p2, p3, p4) {
+                const det = (p2.x - p1.x) * (p4.y - p3.y) - (p4.x - p3.x) * (p2.y - p1.y);
+                if (Math.abs(det) < 0.0001) return false;
+                
+                const t = ((p3.x - p1.x) * (p4.y - p3.y) - (p3.y - p1.y) * (p4.x - p3.x)) / det;
+                const u = -((p1.x - p2.x) * (p1.y - p3.y) - (p1.y - p2.y) * (p1.x - p3.x)) / det;
+                
+                return t >= 0 && t <= 1 && u >= 0 && u <= 1;
+            }
+            
+            draw() {
+                this.graphics.clear();
+                if (this.glowGraphics) {
+                    this.glowGraphics.clear();
+                }
+                
+                // Draw a smooth curve through all physics points
+                if (this.points.length < 2) return;
+                
+                // Create a smooth path through all points using quadratic curves
+                const totalSegments = (this.points.length - 1) * 10;
+                let currentSegment = 0;
+                
+                for (let i = 0; i < this.points.length - 1; i++) {
+                    const p0 = i > 0 ? this.points[i - 1] : this.points[i];
+                    const p1 = this.points[i];
+                    const p2 = this.points[i + 1];
+                    const p3 = i < this.points.length - 2 ? this.points[i + 2] : this.points[i + 1];
+                    
+                    // Draw segments between points
+                    const segments = 10;
+                    for (let j = 0; j < segments; j++) {
+                        const t = j / segments;
+                        const t1 = (j + 1) / segments;
+                        
+                        // Catmull-Rom spline interpolation for smooth curves
+                        const x0 = this.catmullRom(p0.x, p1.x, p2.x, p3.x, t);
+                        const y0 = this.catmullRom(p0.y, p1.y, p2.y, p3.y, t);
+                        const x1 = this.catmullRom(p0.x, p1.x, p2.x, p3.x, t1);
+                        const y1 = this.catmullRom(p0.y, p1.y, p2.y, p3.y, t1);
+                        
+                        // Calculate color and alpha based on state
+                        let color, alpha;
+                        
+                        // Calculate gradient opacity
+                        const globalT = currentSegment / totalSegments;
+                        if (globalT < 0.5) {
+                            alpha = 1.0 - (globalT * 2) * 0.8;
+                        } else {
+                            alpha = 0.2 + ((globalT - 0.5) * 2) * 0.8;
+                        }
+                        
+                        if (this.selected) {
+                            // Use global selected color with saturation
+                            color = processColor(window.selectedColor || 0xFFFF00, window.saturationLevel);
+                            alpha = 1.0; // Full opacity when selected
+                        } else if (this.hovered) {
+                            // Use global hover color with saturation
+                            color = processColor(window.hoverColor || 0x00FFFF, window.saturationLevel);
+                            // Keep gradient alpha for hover
+                        } else {
+                            // Grayish purple when normal
+                            color = 0x483f4b; // Grayish purple color
+                            // Keep gradient alpha
+                        }
+                        
+                        this.graphics.lineStyle(3, color, alpha);
+                        this.graphics.moveTo(x0, y0);
+                        this.graphics.lineTo(x1, y1);
+                        
+                        // Also draw to glow graphics if selected
+                        if (this.selected && this.glowGraphics) {
+                            this.glowGraphics.lineStyle(5, color, alpha * 0.6); // Thicker and slightly transparent for glow
+                            this.glowGraphics.moveTo(x0, y0);
+                            this.glowGraphics.lineTo(x1, y1);
+                        }
+                        
+                        currentSegment++;
+                    }
+                }
+                
+                // Update hit area to follow the wire path
+                if (this.points.length > 1) {
+                    const bounds = new PIXI.Polygon();
+                    
+                    // Create a thick polygon along the wire path
+                    const thickness = 10;
+                    const forwardPoints = [];
+                    const backwardPoints = [];
+                    
+                    // Only create hit area for middle 60% of wire
+                    const skipStart = Math.floor(this.points.length * 0.2);
+                    const skipEnd = Math.floor(this.points.length * 0.8);
+                    
+                    for (let i = skipStart; i < skipEnd; i++) {
+                        const point = this.points[i];
+                        let dx, dy;
+                        
+                        if (i === skipStart) {
+                            dx = this.points[i + 1].x - point.x;
+                            dy = this.points[i + 1].y - point.y;
+                        } else if (i === skipEnd - 1) {
+                            dx = point.x - this.points[i - 1].x;
+                            dy = point.y - this.points[i - 1].y;
+                        } else {
+                            dx = this.points[i + 1].x - this.points[i - 1].x;
+                            dy = this.points[i + 1].y - this.points[i - 1].y;
+                        }
+                        
+                        const len = Math.sqrt(dx * dx + dy * dy);
+                        if (len > 0) {
+                            // Perpendicular vector
+                            const perpX = -dy / len * thickness;
+                            const perpY = dx / len * thickness;
+                            
+                            forwardPoints.push(point.x + perpX, point.y + perpY);
+                            backwardPoints.unshift(point.x - perpX, point.y - perpY);
+                        }
+                    }
+                    
+                    this.graphics.hitArea = new PIXI.Polygon([...forwardPoints, ...backwardPoints]);
+                }
+            }
+            
+            catmullRom(p0, p1, p2, p3, t) {
+                const t2 = t * t;
+                const t3 = t2 * t;
+                return 0.5 * (
+                    2 * p1 +
+                    (-p0 + p2) * t +
+                    (2 * p0 - 5 * p1 + 4 * p2 - p3) * t2 +
+                    (-p0 + 3 * p1 - 3 * p2 + p3) * t3
+                );
+            }
+        }
+        
+        // Create wire between ports
+        function createWire(startPort, endPort) {
+            // Check if input port already has a connection
+            if (endPort.portType === 'input' && endPort.connected) {
+                // Find and remove existing wire
+                const existingConnection = endPort.node.connections.find(conn => conn.port === endPort);
+                if (existingConnection) {
+                    removeWire(existingConnection.wire);
+                }
+            }
+            
+            const wire = new Wire(startPort, endPort);
+            startPort.node.connections.push({ wire, port: startPort });
+            endPort.node.connections.push({ wire, port: endPort });
+            startPort.connected = true;
+            endPort.connected = true;
+
+            // Update port appearance after connection
+            startPort.alpha = 0.6; // Dimmer when connected
+            endPort.alpha = 0.6;
+            
+            // Fade out glow on connected ports
+            if (startPort.glow) {
+                startPort.glowTween = { target: 0, speed: 0.05 };
+            }
+            if (endPort.glow) {
+                endPort.glowTween = { target: 0, speed: 0.05 };
+            }
+            
+            // Update the target node's texture since it has a new input
+            endPort.node.updateNodeTexture();
+        }
+        
+        // Remove wire
+        function removeWire(wire) {
+            // Remove from nodes
+            wire.startPort.node.connections = wire.startPort.node.connections.filter(conn => conn.wire !== wire);
+            wire.endPort.node.connections = wire.endPort.node.connections.filter(conn => conn.wire !== wire);
+            
+            // Update port states
+            const startHasOtherConnections = wire.startPort.node.connections.some(conn => conn.port === wire.startPort);
+            const endHasOtherConnections = wire.endPort.node.connections.some(conn => conn.port === wire.endPort);
+            
+            if (!startHasOtherConnections) {
+                wire.startPort.connected = false;
+                wire.startPort.alpha = 0.8; // Restore original alpha
+            }
+            if (!endHasOtherConnections) {
+                wire.endPort.connected = false;
+                wire.endPort.alpha = 0.8; // Restore original alpha
+            }
+            
+            // Remove from scene
+            wire.graphics.filters = null; // Clean up glow filter
+            if (wire.glowGraphics) {
+                wiresContainer.removeChild(wire.glowGraphics);
+                wire.glowGraphics.destroy();
+            }
+            wiresContainer.removeChild(wire.graphics);
+            const index = wires.indexOf(wire);
+            if (index > -1) {
+                wires.splice(index, 1);
+            }
+        }
+        
+        // Temporary wire while dragging
+        function createTempWire() {
+            tempWire = new PIXI.Graphics();
+            wiresContainer.addChild(tempWire);
+        }
+        
+        function updateTempWire(mouseX, mouseY) {
+            if (!tempWire || !connectionStart) return;
+            
+            tempWire.clear();
+            
+            const start = connectionStart.node.getPortGlobalPos(connectionStart);
+            
+            // Create temporary physics points for collision avoidance
+            const numPoints = 8; // Fewer points for temp wire
+            const tempPoints = [];
+            const tempVelocities = [];
+            
+            // Initialize points along a straight line
+            for (let i = 0; i < numPoints; i++) {
+                const t = i / (numPoints - 1);
+                tempPoints.push({
+                    x: start.x + (mouseX - start.x) * t,
+                    y: start.y + (mouseY - start.y) * t
+                });
+                tempVelocities.push({ x: 0, y: 0 });
+            }
+            
+            // Apply collision avoidance to temp points
+            const avoidanceForces = calculateTempAvoidanceForces(tempPoints);
+            
+            // Update physics for temp points
+            for (let i = 1; i < tempPoints.length - 1; i++) {
+                const t = i / (tempPoints.length - 1);
+                
+                // Rest position (straight line with slight sag)
+                const restX = start.x + (mouseX - start.x) * t;
+                const restY = start.y + (mouseY - start.y) * t + wirePhysics.sag * Math.sin(t * Math.PI);
+                
+                // Spring force to rest position
+                const dx = restX - tempPoints[i].x;
+                const dy = restY - tempPoints[i].y;
+                
+                // Apply spring force
+                tempVelocities[i].x += dx * wirePhysics.stiffness;
+                tempVelocities[i].y += dy * wirePhysics.stiffness;
+                
+                // Apply avoidance forces
+                if (avoidanceForces[i]) {
+                    tempVelocities[i].x += avoidanceForces[i].x;
+                    tempVelocities[i].y += avoidanceForces[i].y;
+                }
+                
+                // Apply damping
+                tempVelocities[i].x *= wirePhysics.damping;
+                tempVelocities[i].y *= wirePhysics.damping;
+                
+                // Update position
+                tempPoints[i].x += tempVelocities[i].x;
+                tempPoints[i].y += tempVelocities[i].y;
+            }
+            
+            // Draw using Catmull-Rom spline like permanent wires
+            if (tempPoints.length < 2) return;
+            
+            const totalSegments = (tempPoints.length - 1) * 8; // Fewer segments for temp wire
+            let currentSegment = 0;
+            
+            for (let i = 0; i < tempPoints.length - 1; i++) {
+                const p0 = i > 0 ? tempPoints[i - 1] : tempPoints[i];
+                const p1 = tempPoints[i];
+                const p2 = tempPoints[i + 1];
+                const p3 = i < tempPoints.length - 2 ? tempPoints[i + 2] : tempPoints[i + 1];
+                
+                // Draw segments between points
+                const segments = 8;
+                for (let j = 0; j < segments; j++) {
+                    const t = j / segments;
+                    const t1 = (j + 1) / segments;
+                    
+                    // Catmull-Rom spline interpolation
+                    const x0 = catmullRom(p0.x, p1.x, p2.x, p3.x, t);
+                    const y0 = catmullRom(p0.y, p1.y, p2.y, p3.y, t);
+                    const x1 = catmullRom(p0.x, p1.x, p2.x, p3.x, t1);
+                    const y1 = catmullRom(p0.y, p1.y, p2.y, p3.y, t1);
+                    
+                    // Calculate color and alpha
+                    let alpha;
+                    let color;
+                    
+                    if (hoveredValidPort) {
+                        // Use hover color with saturation when hovering over valid port
+                        color = processColor(window.hoverColor || 0x00FFFF, window.saturationLevel);
+                        alpha = 1.0;
+                    } else {
+                        // Normal gradient when not hovering
+                        color = 0x4a90e2; // Blue color
+                        const globalT = currentSegment / totalSegments;
+                        if (globalT < 0.5) {
+                            alpha = 0.8 - (globalT * 2) * 0.6;
+                        } else {
+                            alpha = 0.2 + ((globalT - 0.5) * 2) * 0.6;
+                        }
+                    }
+                    
+                    tempWire.lineStyle(3, color, alpha);
+                    tempWire.moveTo(x0, y0);
+                    tempWire.lineTo(x1, y1);
+                    
+                    currentSegment++;
+                }
+            }
+        }
+        
+        // Helper function for temp wire collision avoidance
+        function calculateTempAvoidanceForces(points) {
+            const forces = {};
+            const padding = wirePhysics.collisionPadding;
+            
+            // Check each segment of the temp wire for intersection with nodes
+            for (let i = 0; i < points.length - 1; i++) {
+                const p1 = points[i];
+                const p2 = points[i + 1];
+                
+                for (let node of nodes) {
+                    // Skip the node we're connecting from
+                    if (node === connectionStart.node) continue;
+                    
+                    // Calculate node bounds with padding
+                    const nodeLeft = node.container.x - padding;
+                    const nodeRight = node.container.x + node.width * nodeConfig.scale + padding;
+                    const nodeTop = node.container.y - padding;
+                    const nodeBottom = node.container.y + node.height * nodeConfig.scale + padding;
+                    const nodeCenterX = (nodeLeft + nodeRight) / 2;
+                    const nodeCenterY = (nodeTop + nodeBottom) / 2;
+                    
+                    // Check if line segment intersects with node bounds
+                    if (lineIntersectsRect(p1, p2, nodeLeft, nodeTop, nodeRight, nodeBottom)) {
+                        // Calculate avoidance direction
+                        const wireAngle = Math.atan2(p2.y - p1.y, p2.x - p1.x);
+                        const nodeAngle = Math.atan2(nodeCenterY - p1.y, nodeCenterX - p1.x);
+                        let angleDiff = wireAngle - nodeAngle;
+                        
+                        // Normalize angle difference
+                        while (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
+                        while (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
+                        
+                        // Determine which side to avoid to
+                        const avoidLeft = angleDiff > 0;
+                        
+                        // Apply forces to points near the node
+                        for (let j = Math.max(0, i - 1); j <= Math.min(points.length - 1, i + 2); j++) {
+                            if (j === 0 || j === points.length - 1) continue;
+                            
+                            const point = points[j];
+                            const dx = point.x - nodeCenterX;
+                            const dy = point.y - nodeCenterY;
+                            const dist = Math.sqrt(dx * dx + dy * dy);
+                            
+                            if (dist < Math.sqrt(Math.pow(node.width * nodeConfig.scale / 2, 2) + 
+                                               Math.pow(node.height * nodeConfig.scale / 2, 2)) + padding * 2) {
+                                
+                                // Calculate force magnitude
+                                const nodeRadius = Math.sqrt(Math.pow(node.width * nodeConfig.scale / 2, 2) + 
+                                                           Math.pow(node.height * nodeConfig.scale / 2, 2)) + padding;
+                                
+                                const normalizedDist = dist / nodeRadius;
+                                const forceMag = Math.max(0, Math.pow(1 - normalizedDist, 2)) * wirePhysics.collisionStrength * 0.3;
+                                
+                                if (!forces[j]) forces[j] = { x: 0, y: 0 };
+                                
+                                // Use only radial forces (push away from node) for more stable behavior
+                                const radialX = dx / dist;
+                                const radialY = dy / dist;
+                                
+                                forces[j].x += radialX * forceMag;
+                                forces[j].y += radialY * forceMag;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            return forces;
+        }
+        
+        // Helper function for line-rectangle intersection
+        function lineIntersectsRect(p1, p2, left, top, right, bottom) {
+            // Check if either endpoint is inside
+            if ((p1.x >= left && p1.x <= right && p1.y >= top && p1.y <= bottom) ||
+                (p2.x >= left && p2.x <= right && p2.y >= top && p2.y <= bottom)) {
+                return true;
+            }
+            
+            // Check intersection with each edge
+            return lineIntersectsLine(p1, p2, {x: left, y: top}, {x: right, y: top}) ||
+                   lineIntersectsLine(p1, p2, {x: right, y: top}, {x: right, y: bottom}) ||
+                   lineIntersectsLine(p1, p2, {x: right, y: bottom}, {x: left, y: bottom}) ||
+                   lineIntersectsLine(p1, p2, {x: left, y: bottom}, {x: left, y: top});
+        }
+        
+        function lineIntersectsLine(p1, p2, p3, p4) {
+            const denom = (p4.y - p3.y) * (p2.x - p1.x) - (p4.x - p3.x) * (p2.y - p1.y);
+            if (Math.abs(denom) < 1e-10) return false;
+            
+            const ua = ((p4.x - p3.x) * (p1.y - p3.y) - (p4.y - p3.y) * (p1.x - p3.x)) / denom;
+            const ub = ((p2.x - p1.x) * (p1.y - p3.y) - (p2.y - p1.y) * (p1.x - p3.x)) / denom;
+            
+            return ua >= 0 && ua <= 1 && ub >= 0 && ub <= 1;
+        }
+        
+        // Helper function for Catmull-Rom spline
+        function catmullRom(p0, p1, p2, p3, t) {
+            const t2 = t * t;
+            const t3 = t2 * t;
+            return 0.5 * (
+                2 * p1 +
+                (-p0 + p2) * t +
+                (2 * p0 - 5 * p1 + 4 * p2 - p3) * t2 +
+                (-p0 + 3 * p1 - 3 * p2 + p3) * t3
+            );
+        }
+        
+        // Context menu
+        function showContextMenu(x, y) {
+            const menu = document.getElementById('contextMenu');
+            menu.style.left = x + 'px';
+            menu.style.top = y + 'px';
+            menu.classList.add('active');
+            
+            // Clear existing items
+            menu.innerHTML = '';
+            
+            const items = Object.keys(nodeTypes);
+            
+            items.forEach(type => {
+                const item = document.createElement('div');
+                item.className = 'context-menu-item';
+                item.textContent = nodeTypes[type].name;
+                
+                item.onclick = () => {
+                    console.log('Creating node type:', type, 'textures:', textures);
+                    const worldX = (x - app.screen.width / 2) / camera.zoom + camera.x;
+                    const worldY = (y - app.screen.height / 2) / camera.zoom + camera.y;
+
+                    if (selectedNode) {
+                        selectedNode.setSelected(false);
+                    }
+
+                                                try {
+                    const newNode = new Node(type, worldX, worldY, textures);
+                    newNode.setSelected(true);
+                    selectedNode = newNode;
+                            } catch (error) {
+                                console.error('Error creating node:', type, error);
+                            }
+
+                    hideContextMenu();
+                };
+                
+                menu.appendChild(item);
+            });
+        }
+        
+        function hideContextMenu() {
+            document.getElementById('contextMenu').classList.remove('active');
+        }
+        
+        // Mouse/touch events
+        app.view.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            showContextMenu(e.clientX, e.clientY);
+        });
+        
+        app.view.addEventListener('mousedown', (e) => {
+            if (e.button === 1) { // Middle mouse
+                isPanning = true;
+                e.preventDefault();
+            }
+            // A click on the menu shouldn't hide it immediately
+            if (!e.target.closest || !e.target.closest('.context-menu')) {
+                hideContextMenu();
+            }
+        });
+        
+        app.view.addEventListener('mouseup', (e) => {
+            isPanning = false;
+            
+            if (connectionStart && tempWire) {
+                wiresContainer.removeChild(tempWire);
+                tempWire = null;
+                connectionStart = null;
+                hoveredValidPort = null;
+                
+                // Clear any lingering drop target states
+                nodes.forEach(node => {
+                    [...node.inputs, ...node.outputs].forEach(port => {
+                        if (port.isValidDropTarget) {
+                            port.isValidDropTarget = false;
+                            if (port.glow) {
+                                port.glowTween = { target: 0, speed: 0.1 };
+                            }
+                        }
+                    });
+                });
+            }
+        });
+        
+        app.view.addEventListener('mousemove', (e) => {
+            mouseX = (e.clientX - app.screen.width / 2) / camera.zoom + camera.x;
+            mouseY = (e.clientY - app.screen.height / 2) / camera.zoom + camera.y;
+            
+            if (isPanning) {
+                camera.targetX -= e.movementX / camera.zoom;
+                camera.targetY -= e.movementY / camera.zoom;
+            }
+            
+            if (tempWire && connectionStart) {
+                updateTempWire(mouseX, mouseY);
+            }
+        });
+        
+        app.view.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const scaleFactor = e.deltaY > 0 ? 0.9 : 1.1;
+            camera.targetZoom = Math.max(0.1, Math.min(2, camera.targetZoom * scaleFactor));
+            
+            // Focus on mouse position
+            const worldX = (e.clientX - app.screen.width / 2) / camera.zoom + camera.x;
+            const worldY = (e.clientY - app.screen.height / 2) / camera.zoom + camera.y;
+            
+            camera.targetX = worldX - (worldX - camera.targetX) * scaleFactor;
+            camera.targetY = worldY - (worldY - camera.targetY) * scaleFactor;
+        });
+        
+        // Click on empty space to deselect
+        app.view.addEventListener('click', (e) => {
+             // Let the context menu handle its own clicks
+            if (e.target.closest && e.target.closest('.context-menu')) {
+                return;
+            }
+
+            if (!nodeInteractionInProgress && !parameterInteractionInProgress && e.target === app.view) {
+                // Deselect node
+                if (selectedNode) {
+                selectedNode.setSelected(false);
+                selectedNode = null;
+                }
+                
+                // Deselect any selected wires
+                wires.forEach(wire => {
+                    if (wire.selected) {
+                        wire.selected = false;
+                        wire.graphics.filters = null;
+                        if (wire.glowGraphics) {
+                            wire.glowGraphics.visible = false;
+                        }
+                        wire.draw();
+                    }
+                });
+            }
+        });
+        
+        // Track global mouse position continuously
+        let globalMouseX = 0;
+        let globalMouseY = 0;
+        app.view.addEventListener('pointermove', (e) => {
+            globalMouseX = e.clientX;
+            globalMouseY = e.clientY;
+        });
+        
+        // Animation loop
+        app.ticker.add(() => {
+            // Update nodes
+            nodes.forEach(node => node.update());
+
+            // Handle active drag separately in ticker for smoother movement
+            if (activeDrag && activeDrag.isDragging) {
+                // Convert screen coordinates to world coordinates
+                const worldX = (globalMouseX - app.screen.width / 2) / camera.zoom + camera.x;
+                const worldY = (globalMouseY - app.screen.height / 2) / camera.zoom + camera.y;
+                
+                // Update node position
+                activeDrag.node.container.x = worldX - activeDrag.offset.x;
+                activeDrag.node.container.y = worldY - activeDrag.offset.y;
+                
+
+                
+                // Update global mouse position
+                mouseX = worldX;
+                mouseY = worldY;
+            }
+
+            // Smooth camera movement
+            const smoothing = 0.15;
+            camera.x += (camera.targetX - camera.x) * smoothing;
+            camera.y += (camera.targetY - camera.y) * smoothing;
+            camera.zoom += (camera.targetZoom - camera.zoom) * smoothing;
+            
+            // Update viewport transform
+            viewport.x = app.screen.width / 2;
+            viewport.y = app.screen.height / 2;
+            viewport.scale.set(camera.zoom);
+            viewport.pivot.set(camera.x, camera.y);
+            
+            // Update grid
+            gridContainer.x = camera.x;
+            gridContainer.y = camera.y;
+            
+            // Update wires physics
+            wires.forEach(wire => wire.update());
+            
+
+        });
+        
+        // Handle resize
+        window.addEventListener('resize', () => {
+            app.renderer.resize(window.innerWidth, window.innerHeight);
+            drawGrid();
+        });
+        
+        // Keyboard event handler
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Delete' || e.key === 'Backspace') {
+                // Delete selected wires
+                const selectedWires = wires.filter(w => w.selected);
+                selectedWires.forEach(wire => {
+                    removeWire(wire);
+                });
+            }
+        });
+        
+        // Physics slider event handlers
+        function setupPhysicsControls() {
+            const sliders = [
+                { id: 'minStiffnessSlider', valueId: 'minStiffnessValue', prop: 'minStiffness' },
+                { id: 'maxStiffnessSlider', valueId: 'maxStiffnessValue', prop: 'maxStiffness' },
+                { id: 'stiffnessBiasSlider', valueId: 'stiffnessBiasValue', prop: 'stiffnessBias' },
+                { id: 'dampingSlider', valueId: 'dampingValue', prop: 'damping' },
+                { id: 'gravitySlider', valueId: 'gravityValue', prop: 'gravity' },
+                { id: 'sagSlider', valueId: 'sagValue', prop: 'sag' },
+                { id: 'collisionStrengthSlider', valueId: 'collisionStrengthValue', prop: 'collisionStrength' },
+                { id: 'collisionPaddingSlider', valueId: 'collisionPaddingValue', prop: 'collisionPadding' },
+                { id: 'portStiffnessSlider', valueId: 'portStiffnessValue', prop: 'portStiffness' },
+                { id: 'wirePointsSlider', valueId: 'wirePointsValue', prop: 'wirePoints' }
+            ];
+
+            sliders.forEach(({ id, valueId, prop }) => {
+                const slider = document.getElementById(id);
+                const valueDisplay = document.getElementById(valueId);
+                
+                slider.addEventListener('input', (e) => {
+                    const value = parseFloat(e.target.value);
+                    wirePhysics[prop] = value;
+                    valueDisplay.textContent = value;
+                });
+            });
+        }
+
+        // Initialize WebGPU
+        async function initializeWebGPU() {
+            const success = await webGPURenderer.initialize();
+            if (success) {
+                console.log('✅ WebGPU ready for blend operations');
+            } else {
+                console.error('❌ WebGPU is required but not available');
+                
+                // Show error overlay
+                const errorOverlay = document.createElement('div');
+                errorOverlay.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: rgba(0, 0, 0, 0.9);
+                    color: white;
+                    padding: 40px;
+                    border-radius: 10px;
+                    font-family: 'JetBrains Mono', monospace;
+                    text-align: center;
+                    z-index: 10000;
+                    border: 2px solid #ff0000;
+                `;
+                errorOverlay.innerHTML = `
+                    <h2 style="color: #ff0000; margin: 0 0 20px 0;">WebGPU Required</h2>
+                    <p>This application requires WebGPU support.</p>
+                    <p style="margin: 20px 0;">Please check:</p>
+                    <ul style="list-style: none; padding: 0; text-align: left;">
+                        <li>1️⃣ Chrome version 113+ (chrome://version)</li>
+                        <li>2️⃣ Hardware acceleration enabled (chrome://settings)</li>
+                        <li>3️⃣ WebGPU enabled (chrome://flags/#enable-unsafe-webgpu)</li>
+                        <li>4️⃣ Not in Incognito mode</li>
+                        <li>5️⃣ GPU not blacklisted (chrome://gpu)</li>
+                    </ul>
+                    <p style="margin-top: 20px; font-size: 14px;">
+                        <strong>Check console (F12) for detailed error info</strong>
+                    </p>
+                `;
+                document.body.appendChild(errorOverlay);
+            }
+        }
+
+        // Setup collapsible physics panel
+        function setupCollapsiblePhysics() {
+            const physicsToggle = document.getElementById('physicsToggle');
+            const physicsHeader = document.querySelector('.physics-header');
+            const controlsContainer = document.getElementById('physicsControlsContainer');
+            let isCollapsed = false;
+            
+            function togglePhysics() {
+                isCollapsed = !isCollapsed;
+                if (isCollapsed) {
+                    controlsContainer.classList.add('collapsed');
+                    physicsToggle.textContent = '▶';
+                    physicsToggle.style.transform = 'rotate(0deg)';
+                } else {
+                    controlsContainer.classList.remove('collapsed');
+                    physicsToggle.textContent = '▼';
+                    physicsToggle.style.transform = 'rotate(0deg)';
+                }
+            }
+            
+            physicsToggle.addEventListener('click', togglePhysics);
+            physicsHeader.addEventListener('click', (e) => {
+                if (e.target !== physicsToggle) {
+                    togglePhysics();
+                }
+            });
+        }
+
+        // Setup collapsible color palette panel
+        function setupColorPalette() {
+            const colorToggle = document.getElementById('colorToggle');
+            const colorHeader = document.querySelector('.color-header');
+            const controlsContainer = document.getElementById('colorControlsContainer');
+            const resetButton = document.getElementById('colorReset');
+            let isCollapsed = false;
+            let selectedColor = null;
+            
+            // Color palettes (HSV format: [Hue(0-360), Saturation(0-100), Value(0-100)])
+            const colorPalettes = {
+                material: {
+                    name: 'Material Design',
+                    GN: [122, 62, 76], // Material Green
+                    CN: [207, 86, 95], // Material Blue  
+                    MN: [36, 100, 100], // Material Orange
+                    UN: [283, 77, 69], // Material Purple
+                    DN: [4, 78, 96]   // Material Red
+                },
+                tailwind: {
+                    name: 'Tailwind Modern',
+                    GN: [161, 84, 70], // Emerald-500
+                    CN: [217, 91, 96], // Blue-500
+                    MN: [45, 96, 96], // Amber-500
+                    UN: [258, 63, 96], // Violet-500
+                    DN: [0, 73, 94]   // Red-500
+                },
+                github: {
+                    name: 'GitHub Dark',
+                    GN: [134, 44, 72], // GitHub Green
+                    CN: [212, 65, 100], // GitHub Blue
+                    MN: [44, 84, 82], // GitHub Yellow
+                    UN: [273, 35, 86], // GitHub Purple
+                    DN: [3, 70, 97]   // GitHub Red
+                },
+                notion: {
+                    name: 'Notion Workspace',
+                    GN: [142, 90, 47], // Notion Green
+                    CN: [200, 92, 60], // Notion Blue
+                    MN: [28, 95, 85], // Notion Orange
+                    UN: [258, 62, 65], // Notion Purple
+                    DN: [0, 72, 88]   // Notion Red
+                },
+                figma: {
+                    name: 'Figma Design',
+                    GN: [147, 94, 66], // Figma Green
+                    CN: [202, 92, 96], // Figma Blue
+                    MN: [36, 85, 100], // Figma Orange
+                    UN: [272, 60, 97], // Figma Purple
+                    DN: [11, 88, 95]  // Figma Red
+                },
+                apple: {
+                    name: 'Apple HIG',
+                    GN: [135, 74, 78], // System Green
+                    CN: [211, 100, 100], // System Blue
+                    MN: [36, 100, 100], // System Orange
+                    UN: [276, 63, 87], // System Purple
+                    DN: [4, 81, 100]  // System Red
+                },
+                ibm: {
+                    name: 'IBM Carbon',
+                    GN: [140, 77, 63], // Carbon Green 50
+                    CN: [219, 94, 100], // Carbon Blue 60
+                    MN: [52, 86, 95], // Carbon Yellow 30
+                    UN: [265, 75, 99], // Carbon Purple 60
+                    DN: [354, 85, 85]  // Carbon Red 60
+                },
+                ant: {
+                    name: 'Ant Design',
+                    GN: [95, 87, 77], // Success Green
+                    CN: [210, 90, 100], // Primary Blue
+                    MN: [42, 92, 98], // Warning Orange
+                    UN: [258, 78, 82], // Purple
+                    DN: [355, 86, 96]  // Error Red
+                },
+                slack: {
+                    name: 'Slack Brand',
+                    GN: [155, 74, 71], // Slack Green
+                    CN: [194, 77, 94], // Slack Blue
+                    MN: [43, 80, 93], // Slack Yellow
+                    UN: [337, 87, 88], // Slack Red/Pink
+                    DN: [290, 72, 29]  // Slack Aubergine
+                },
+                stripe: {
+                    name: 'Stripe Clean',
+                    GN: [130, 100, 85], // Stripe Green
+                    CN: [246, 64, 100], // Stripe Blurple
+                    MN: [45, 73, 100], // Stripe Yellow
+                    UN: [211, 83, 25], // Stripe Dark Blue
+                    DN: [6, 64, 88]  // Stripe Coral
+                },
+                vercel: {
+                    name: 'Vercel Mono',
+                    GN: [215, 100, 95], // Vercel Blue
+                    CN: [286, 80, 79], // Vercel Purple
+                    MN: [328, 100, 100], // Vercel Pink
+                    UN: [0, 0, 0], // Black
+                    DN: [0, 0, 20]  // Dark Gray
+                },
+                atlassian: {
+                    name: 'Atlassian Suite',
+                    GN: [157, 100, 53], // Jira Green
+                    CN: [218, 100, 80], // Confluence Blue
+                    MN: [11, 81, 100], // Error Red
+                    UN: [254, 49, 75], // Purple
+                    DN: [217, 64, 30]  // Dark Blue
+                }
+            };
+            
+            // Load saved palette from localStorage or default to material
+            let currentPalette = localStorage.getItem('nodePalette') || 'material';
+            
+            // Convert HSV palette to hex colors, with custom color overrides
+            const categoryColors = {};
+            const palette = colorPalettes[currentPalette];
+            Object.keys(palette).forEach(category => {
+                if (category !== 'name') {
+                    // Check for saved custom color first, otherwise use palette color
+                    const savedColor = localStorage.getItem(`nodeColor_${category}`);
+                    if (savedColor) {
+                        categoryColors[category] = savedColor;
+                    } else {
+                        const hsvArray = palette[category];
+                        const hexColor = hsvToHex(hsvArray[0], hsvArray[1], hsvArray[2]);
+                        categoryColors[category] = '#' + hexColor.toString(16).padStart(6, '0');
+                    }
+                }
+            });
+            
+            // Store category colors globally
+            window.categoryColors = { ...categoryColors };
+            
+            // Load saved settings with defaults
+            window.saturationLevel = parseInt(localStorage.getItem('nodeSaturation')) || 100;
+            window.hoverColor = parseInt(localStorage.getItem('nodeHoverColor')) || 0x00FFFF;
+            window.selectedColor = parseInt(localStorage.getItem('nodeSelectedColor')) || 0xFFFF00;
+            
+            // Setup saturation slider
+            const saturationSlider = document.getElementById('saturationSlider');
+            const saturationValue = document.getElementById('saturationValue');
+            
+            // Set initial values from localStorage
+            saturationSlider.value = window.saturationLevel;
+            saturationValue.textContent = window.saturationLevel + '%';
+            
+            saturationSlider.addEventListener('input', (e) => {
+                const value = parseInt(e.target.value);
+                window.saturationLevel = value;
+                saturationValue.textContent = value + '%';
+                // Auto-save saturation level
+                localStorage.setItem('nodeSaturation', value);
+                updateNodeCategoryColors();
+                updateInteractionColors();
+            });
+            
+
+            
+
+            
+            // Setup interaction color pickers
+            const hoverColorPicker = document.getElementById('colorHover');
+            const selectedColorPicker = document.getElementById('colorSelected');
+            
+            // Set initial values from localStorage
+            hoverColorPicker.value = '#' + window.hoverColor.toString(16).padStart(6, '0');
+            selectedColorPicker.value = '#' + window.selectedColor.toString(16).padStart(6, '0');
+            
+            hoverColorPicker.addEventListener('change', (e) => {
+                window.hoverColor = parseInt(e.target.value.replace('#', '0x'));
+                // Auto-save hover color
+                localStorage.setItem('nodeHoverColor', window.hoverColor);
+                updateInteractionColors();
+            });
+            
+            selectedColorPicker.addEventListener('change', (e) => {
+                window.selectedColor = parseInt(e.target.value.replace('#', '0x'));
+                // Auto-save selected color
+                localStorage.setItem('nodeSelectedColor', window.selectedColor);
+                updateInteractionColors();
+            });
+            
+            // Setup palette selector
+            const paletteSelector = document.getElementById('paletteSelector');
+            paletteSelector.value = currentPalette; // Set to loaded/default palette
+            paletteSelector.addEventListener('change', (e) => {
+                const selectedPalette = e.target.value;
+                // Save to localStorage
+                localStorage.setItem('nodePalette', selectedPalette);
+                applyPalette(selectedPalette);
+            });
+            
+            // Function to apply a palette
+            function applyPalette(paletteName) {
+                const palette = colorPalettes[paletteName];
+                if (!palette) return;
+                
+                currentPalette = paletteName;
+                
+                // Update category colors (convert HSV to hex)
+                Object.keys(palette).forEach(category => {
+                    if (category !== 'name') {
+                        const hsvArray = palette[category];
+                        const hexColor = hsvToHex(hsvArray[0], hsvArray[1], hsvArray[2]);
+                        const hexString = '#' + hexColor.toString(16).padStart(6, '0');
+                        
+                        window.categoryColors[category] = hexString;
+                        const colorPicker = document.getElementById(`color${category}`);
+                        if (colorPicker) {
+                            colorPicker.value = hexString;
+                        }
+                    }
+                });
+                
+                updateNodeCategoryColors();
+            }
+            
+            // Setup category color pickers
+            Object.keys(categoryColors).forEach(category => {
+                const colorPicker = document.getElementById(`color${category}`);
+                if (colorPicker && categoryColors[category]) {
+                    colorPicker.value = categoryColors[category]; // Use converted hex values
+                    colorPicker.addEventListener('change', (e) => {
+                        window.categoryColors[category] = e.target.value;
+                        // Auto-save custom colors to localStorage
+                        localStorage.setItem(`nodeColor_${category}`, e.target.value);
+                        updateNodeCategoryColors();
+                    });
+                }
+            });
+            
+            // Removed global tint swatches for compact design
+            
+            // Reset button functionality
+            resetButton.addEventListener('click', () => {
+                // Clear all saved settings from localStorage
+                localStorage.removeItem('nodeSaturation');
+                localStorage.removeItem('nodeHoverColor');
+                localStorage.removeItem('nodeSelectedColor');
+                
+                // Clear custom colors for all categories
+                ['GN', 'CN', 'MN', 'UN', 'DN'].forEach(category => {
+                    localStorage.removeItem(`nodeColor_${category}`);
+                });
+                
+                // Reset saturation
+                window.saturationLevel = 100;
+                saturationSlider.value = 100;
+                saturationValue.textContent = '100%';
+                localStorage.setItem('nodeSaturation', 100);
+                
+                // Reset interaction colors
+                window.hoverColor = 0x00FFFF;
+                window.selectedColor = 0xFFFF00;
+                hoverColorPicker.value = '#00FFFF';
+                selectedColorPicker.value = '#FFFF00';
+                localStorage.setItem('nodeHoverColor', 0x00FFFF);
+                localStorage.setItem('nodeSelectedColor', 0xFFFF00);
+                
+                // Reset to current palette colors
+                applyPalette(currentPalette);
+                updateInteractionColors();
+            });
+            
+            function toggleColors() {
+                isCollapsed = !isCollapsed;
+                if (isCollapsed) {
+                    controlsContainer.classList.add('collapsed');
+                    colorToggle.textContent = '▶';
+                } else {
+                    controlsContainer.classList.remove('collapsed');
+                    colorToggle.textContent = '▼';
+                }
+            }
+            
+            colorToggle.addEventListener('click', toggleColors);
+            colorHeader.addEventListener('click', (e) => {
+                if (e.target !== colorToggle) {
+                    toggleColors();
+                }
+            });
+        }
+        
+        // Apply global tint to all nodes
+        function applyGlobalTintToNodes(color) {
+            const hexColor = parseInt(color.replace('#', '0x'));
+            
+            // Store global tint
+            window.globalNodeTint = hexColor;
+            
+            // Apply to all existing nodes
+            nodes.forEach(node => {
+                updateNodeColor(node);
+            });
+        }
+        
+        // Update colors based on categories
+        function updateNodeCategoryColors() {
+            nodes.forEach(node => {
+                updateNodeColor(node);
+            });
+        }
+        
+        // Update interaction colors (hover/selected)
+        function updateInteractionColors() {
+            // Apply saturation to interaction colors
+            let hoverTint = processColor(window.hoverColor, window.saturationLevel);
+            let selectedTint = processColor(window.selectedColor, window.saturationLevel);
+            
+            // Update all nodes' hover and selection outlines
+            nodes.forEach(node => {
+                if (node.hoverOutline) {
+                    node.hoverOutline.tint = hoverTint;
+                }
+                if (node.selectionOutline) {
+                    node.selectionOutline.tint = selectedTint;
+                }
+            });
+            
+            // Update all wires to use new colors
+            wires.forEach(wire => {
+                wire.draw();
+            });
+        }
+        
+        // HSV to RGB conversion
+        function hsvToRgb(h, s, v) {
+            h = h / 360; // Convert to 0-1 range
+            s = s / 100; // Convert to 0-1 range  
+            v = v / 100; // Convert to 0-1 range
+            
+            const c = v * s;
+            const x = c * (1 - Math.abs(((h * 6) % 2) - 1));
+            const m = v - c;
+            
+            let r, g, b;
+            if (h < 1/6) {
+                r = c; g = x; b = 0;
+            } else if (h < 2/6) {
+                r = x; g = c; b = 0;
+            } else if (h < 3/6) {
+                r = 0; g = c; b = x;
+            } else if (h < 4/6) {
+                r = 0; g = x; b = c;
+            } else if (h < 5/6) {
+                r = x; g = 0; b = c;
+            } else {
+                r = c; g = 0; b = x;
+            }
+            
+            return {
+                r: Math.round((r + m) * 255),
+                g: Math.round((g + m) * 255),
+                b: Math.round((b + m) * 255)
+            };
+        }
+        
+        // Convert HSV to hex color
+        function hsvToHex(h, s, v) {
+            const rgb = hsvToRgb(h, s, v);
+            return ((rgb.r << 16) | (rgb.g << 8) | rgb.b);
+        }
+        
+        // Simple brightness check: < 128 = dark (use white text), >= 128 = light (use black text)
+        function isColorLight(hexColor) {
+            const r = (hexColor >> 16) & 0xFF;
+            const g = (hexColor >> 8) & 0xFF;
+            const b = hexColor & 0xFF;
+            
+            // Average RGB value
+            const brightness = (r + g + b) / 3;
+            
+            return brightness >= 128;
+        }
+        
+        // Apply desaturation to a color (HDR-aware)
+        function desaturateColor(hexColor, saturation) {
+            // Extract RGB values, handling potential HDR overflow
+            const r = (hexColor >> 16) & 0xFFFF;
+            const g = (hexColor >> 8) & 0xFFFF;
+            const b = hexColor & 0xFFFF;
+            
+            // Convert to grayscale using HDR-aware luminance
+            const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+            
+            // Mix original color with gray based on saturation level (HDR preserved)
+            const factor = saturation / 100;
+            const newR = Math.round(gray + (r - gray) * factor);
+            const newG = Math.round(gray + (g - gray) * factor);
+            const newB = Math.round(gray + (b - gray) * factor);
+            
+            // Pack back without clamping for HDR
+            return ((newR & 0xFFFF) << 16) | ((newG & 0xFFFF) << 8) | (newB & 0xFFFF);
+        }
+        
+
+        
+        // Apply saturation adjustment
+        function processColor(hexColor, saturation) {
+            let color = hexColor;
+            
+            // Apply desaturation if needed
+            if (saturation !== undefined && saturation < 100) {
+                color = desaturateColor(color, saturation);
+            }
+            
+            return color;
+        }
+        
+        // Update a single node's color
+        function updateNodeColor(node) {
+            if (!node.baseSprite) return;
+            
+            // Get category color
+            const category = node.config.category || 'UN'; // Default to utility if no category
+            const categoryColor = window.categoryColors[category] || '#ffffff';
+            const categoryHex = parseInt(categoryColor.replace('#', '0x'));
+            
+            // Apply saturation adjustment
+            let finalColor = processColor(categoryHex, window.saturationLevel);
+            
+            // If there's a global tint and it's not white, blend it
+            if (window.globalNodeTint && window.globalNodeTint !== 0xffffff) {
+                // Simple multiply blend
+                const r1 = (finalColor >> 16) & 0xff;
+                const g1 = (finalColor >> 8) & 0xff;
+                const b1 = finalColor & 0xff;
+                
+                const r2 = (window.globalNodeTint >> 16) & 0xff;
+                const g2 = (window.globalNodeTint >> 8) & 0xff;
+                const b2 = window.globalNodeTint & 0xff;
+                
+                const r = Math.floor((r1 * r2) / 255);
+                const g = Math.floor((g1 * g2) / 255);
+                const b = Math.floor((b1 * b2) / 255);
+                
+                finalColor = (r << 16) | (g << 8) | b;
+            }
+            
+            // Apply final color to sprite
+            node.baseSprite.tint = finalColor;
+            
+            // Update text color based on background
+            if (node.topLabel) {
+                const textColor = isColorLight(finalColor) ? 0x000000 : 0xFFFFFF;
+                node.topLabel.style.fill = textColor;
+            }
+        }
+
+        // Initialize
+        drawGrid();
+        setupPhysicsControls();
+        setupCollapsiblePhysics();
+        setupColorPalette();
+        setupPreviewWindowInteractions();
+        initializeWebGPU();
+        
+        // Setup preview window dragging and resizing
+        function setupPreviewWindowInteractions() {
+            const previewWindow = document.getElementById('previewWindow');
+            const previewHeader = document.getElementById('previewHeader');
+            
+            // State variables
+            let isDragging = false;
+            let isResizing = false;
+            let resizeHandle = null;
+            let startX = 0;
+            let startY = 0;
+            let startWidth = 0;
+            let startHeight = 0;
+            let startLeft = 0;
+            let startTop = 0;
+            
+            // Get current position and size
+            function getCurrentBounds() {
+                const rect = previewWindow.getBoundingClientRect();
+                return {
+                    left: rect.left,
+                    top: rect.top,
+                    width: rect.width,
+                    height: rect.height
+                };
+            }
+            
+            // Drag functionality
+            function startDrag(e) {
+                if (isResizing) return;
+                isDragging = true;
+                startX = e.clientX;
+                startY = e.clientY;
+                const bounds = getCurrentBounds();
+                startLeft = bounds.left;
+                startTop = bounds.top;
+                previewWindow.style.transition = 'none';
+                e.preventDefault();
+            }
+            
+            function doDrag(e) {
+                if (!isDragging) return;
+                
+                const deltaX = e.clientX - startX;
+                const deltaY = e.clientY - startY;
+                
+                let newX = startLeft + deltaX;
+                let newY = startTop + deltaY;
+                
+                const windowWidth = previewWindow.offsetWidth;
+                const windowHeight = previewWindow.offsetHeight;
+                const viewportWidth = window.innerWidth;
+                const viewportHeight = window.innerHeight;
+                
+                const margin = 20;
+                newX = Math.max(margin, Math.min(viewportWidth - windowWidth - margin, newX));
+                newY = Math.max(margin, Math.min(viewportHeight - windowHeight - margin, newY));
+                
+                previewWindow.style.left = newX + 'px';
+                previewWindow.style.top = newY + 'px';
+                previewWindow.style.right = 'auto';
+                previewWindow.style.bottom = 'auto';
+            }
+            
+            // Resize functionality
+            function startResize(e, handle) {
+                isResizing = true;
+                resizeHandle = handle;
+                startX = e.clientX;
+                startY = e.clientY;
+                const bounds = getCurrentBounds();
+                startWidth = bounds.width;
+                startHeight = bounds.height;
+                startLeft = bounds.left;
+                startTop = bounds.top;
+                previewWindow.style.transition = 'none';
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            function doResize(e) {
+                if (!isResizing) return;
+                
+                const deltaX = e.clientX - startX;
+                const deltaY = e.clientY - startY;
+                
+                let newWidth = startWidth;
+                let newHeight = startHeight;
+                let newLeft = startLeft;
+                let newTop = startTop;
+                
+                // Handle each resize direction
+                if (resizeHandle.includes('e')) {
+                    newWidth = Math.max(150, startWidth + deltaX);
+                }
+                if (resizeHandle.includes('w')) {
+                    newWidth = Math.max(150, startWidth - deltaX);
+                    newLeft = startLeft + startWidth - newWidth;
+                }
+                if (resizeHandle.includes('s')) {
+                    newHeight = Math.max(150, startHeight + deltaY);
+                }
+                if (resizeHandle.includes('n')) {
+                    newHeight = Math.max(150, startHeight - deltaY);
+                    newTop = startTop + startHeight - newHeight;
+                }
+                
+                // Apply constraints
+                const viewportWidth = window.innerWidth;
+                const viewportHeight = window.innerHeight;
+                const margin = 20;
+                
+                if (newLeft < margin) {
+                    newLeft = margin;
+                    newWidth = startLeft + startWidth - margin;
+                }
+                if (newTop < margin) {
+                    newTop = margin;
+                    newHeight = startTop + startHeight - margin;
+                }
+                if (newLeft + newWidth > viewportWidth - margin) {
+                    newWidth = viewportWidth - margin - newLeft;
+                }
+                if (newTop + newHeight > viewportHeight - margin) {
+                    newHeight = viewportHeight - margin - newTop;
+                }
+                
+                // Apply new bounds
+                previewWindow.style.width = newWidth + 'px';
+                previewWindow.style.height = newHeight + 'px';
+                previewWindow.style.left = newLeft + 'px';
+                previewWindow.style.top = newTop + 'px';
+                previewWindow.style.right = 'auto';
+                previewWindow.style.bottom = 'auto';
+            }
+            
+            function stopInteraction() {
+                isDragging = false;
+                isResizing = false;
+                resizeHandle = null;
+                previewWindow.style.transition = '';
+            }
+            
+            // Add event listeners for dragging
+            previewHeader.addEventListener('mousedown', startDrag);
+            
+            // Add event listeners for resize handles
+            const resizeHandles = previewWindow.querySelectorAll('.resize-handle');
+            resizeHandles.forEach(handle => {
+                handle.addEventListener('mousedown', (e) => {
+                    const classes = handle.className.split(' ');
+                    const handleType = classes[1].replace('resize-', '');
+                    startResize(e, handleType);
+                });
+            });
+            
+            // Global mouse events
+            document.addEventListener('mousemove', (e) => {
+                if (isDragging) {
+                    doDrag(e);
+                } else if (isResizing) {
+                    doResize(e);
+                }
+            });
+            
+            document.addEventListener('mouseup', stopInteraction);
+            
+            // Prevent text selection during interactions
+            previewWindow.addEventListener('selectstart', (e) => {
+                if (isDragging || isResizing) e.preventDefault();
+            });
+        }
+    </script>
+</body>
+</html>

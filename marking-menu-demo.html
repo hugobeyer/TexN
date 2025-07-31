@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marking Menu Demo - Node Categories</title>
+    <style>
+        body {
+            background: #1a1a1a;
+            color: #ccc;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .demo-container {
+            display: flex;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+        
+        .demo-section {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 0px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+            min-width: 300px;
+        }
+        
+        .demo-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #555;
+            padding-bottom: 8px;
+        }
+        
+        /* Radial Marking Menu */
+        .radial-menu {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 20px auto;
+        }
+        
+        .radial-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            background: #333;
+            border: 2px solid #666;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #ccc;
+        }
+        
+        .radial-item {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: #444;
+            border: 1px solid #666;
+            border-radius: 0px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .radial-item:hover {
+            background: #555;
+            transform: scale(1.1);
+        }
+        
+        .radial-item.gn { background: #4CAF50; }
+        .radial-item.cn { background: #2196F3; }
+        .radial-item.mn { background: #FF9800; }
+        .radial-item.un { background: #9C27B0; }
+        .radial-item.dn { background: #F44336; }
+        
+        /* Linear Marking Menu */
+        .linear-menu {
+            display: flex;
+            gap: 8px;
+            margin: 20px 0;
+        }
+        
+        .linear-item {
+            width: 35px;
+            height: 35px;
+            border: 1px solid #555;
+            border-radius: 0px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .linear-item:hover {
+            transform: scale(1.05);
+        }
+        
+        /* Compact Toolbar */
+        .compact-toolbar {
+            display: flex;
+            gap: 2px;
+            background: #333;
+            border: 1px solid #555;
+            border-radius: 0px;
+            padding: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .toolbar-item {
+            width: 28px;
+            height: 28px;
+            border: 1px solid #666;
+            border-radius: 0px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 7px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .toolbar-item:hover {
+            background: #555;
+        }
+        
+        /* Pie Menu */
+        .pie-menu {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            margin: 20px auto;
+        }
+        
+        .pie-slice {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .pie-slice:hover {
+            transform: scale(1.1);
+        }
+        
+        /* Description */
+        .description {
+            font-size: 11px;
+            color: #aaa;
+            line-height: 1.4;
+            margin-top: 15px;
+        }
+        
+        .pros-cons {
+            margin-top: 10px;
+            font-size: 10px;
+        }
+        
+        .pros {
+            color: #4CAF50;
+        }
+        
+        .cons {
+            color: #F44336;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="color: #fff; text-align: center; margin-bottom: 30px;">Marking Menu Ideas for Node Categories</h1>
+    
+    <div class="demo-container">
+        
+        <!-- Radial Marking Menu -->
+        <div class="demo-section">
+            <div class="demo-title">Radial Marking Menu</div>
+            <div class="radial-menu">
+                <div class="radial-center">+</div>
+                <div class="radial-item gn" style="top: 20px; left: 50%; transform: translateX(-50%);">GN</div>
+                <div class="radial-item cn" style="top: 50%; right: 20px; transform: translateY(-50%);">CN</div>
+                <div class="radial-item mn" style="bottom: 20px; left: 50%; transform: translateX(-50%);">MN</div>
+                <div class="radial-item un" style="top: 50%; left: 20px; transform: translateY(-50%);">UN</div>
+                <div class="radial-item dn" style="top: 35%; left: 35%; transform: translate(-50%, -50%);">DN</div>
+            </div>
+            <div class="description">
+                <strong>Radial Menu:</strong> Click and drag from center to select category. 
+                <div class="pros-cons">
+                    <div class="pros">✓ Fast muscle memory</div>
+                    <div class="pros">✓ Visual category colors</div>
+                    <div class="cons">✗ Takes more screen space</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Linear Marking Menu -->
+        <div class="demo-section">
+            <div class="demo-title">Linear Marking Menu</div>
+            <div class="linear-menu">
+                <div class="linear-item gn">GN</div>
+                <div class="linear-item cn">CN</div>
+                <div class="linear-item mn">MN</div>
+                <div class="linear-item un">UN</div>
+                <div class="linear-item dn">DN</div>
+            </div>
+            <div class="description">
+                <strong>Linear Menu:</strong> Horizontal or vertical strip of category buttons.
+                <div class="pros-cons">
+                    <div class="pros">✓ Compact space usage</div>
+                    <div class="pros">✓ Easy to scan</div>
+                    <div class="cons">✗ Less visual hierarchy</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Compact Toolbar -->
+        <div class="demo-section">
+            <div class="demo-title">Compact Toolbar</div>
+            <div class="compact-toolbar">
+                <div class="toolbar-item gn">G</div>
+                <div class="toolbar-item cn">C</div>
+                <div class="toolbar-item mn">M</div>
+                <div class="toolbar-item un">U</div>
+                <div class="toolbar-item dn">D</div>
+            </div>
+            <div class="description">
+                <strong>Compact Toolbar:</strong> Minimal buttons with single letters.
+                <div class="pros-cons">
+                    <div class="pros">✓ Very space efficient</div>
+                    <div class="pros">✓ Always visible</div>
+                    <div class="cons">✗ Less discoverable</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pie Menu -->
+        <div class="demo-section">
+            <div class="demo-title">Pie Menu</div>
+            <div class="pie-menu">
+                <div class="pie-slice gn" style="border-width: 0 75px 75px 75px; border-color: transparent transparent #4CAF50 transparent; top: 0; left: 50%; transform: translateX(-50%);"></div>
+                <div class="pie-slice cn" style="border-width: 75px 0 75px 75px; border-color: transparent transparent transparent #2196F3; top: 50%; right: 0; transform: translateY(-50%);"></div>
+                <div class="pie-slice mn" style="border-width: 75px 75px 0 75px; border-color: #FF9800 transparent transparent transparent; bottom: 0; left: 50%; transform: translateX(-50%);"></div>
+                <div class="pie-slice un" style="border-width: 75px 75px 75px 0; border-color: transparent #9C27B0 transparent transparent; top: 50%; left: 0; transform: translateY(-50%);"></div>
+            </div>
+            <div class="description">
+                <strong>Pie Menu:</strong> Circular segments for each category.
+                <div class="pros-cons">
+                    <div class="pros">✓ Intuitive direction-based</div>
+                    <div class="pros">✓ Good visual feedback</div>
+                    <div class="cons">✗ Complex implementation</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Context Menu -->
+        <div class="demo-section">
+            <div class="demo-title">Context Menu</div>
+            <div style="background: #333; border: 1px solid #555; padding: 8px; width: 120px;">
+                <div style="padding: 4px 8px; font-size: 10px; color: #fff; cursor: pointer; border-bottom: 1px solid #555;">📊 Generators (GN)</div>
+                <div style="padding: 4px 8px; font-size: 10px; color: #fff; cursor: pointer; border-bottom: 1px solid #555;">🔢 Constants (CN)</div>
+                <div style="padding: 4px 8px; font-size: 10px; color: #fff; cursor: pointer; border-bottom: 1px solid #555;">➕ Math (MN)</div>
+                <div style="padding: 4px 8px; font-size: 10px; color: #fff; cursor: pointer; border-bottom: 1px solid #555;">🔧 Utility (UN)</div>
+                <div style="padding: 4px 8px; font-size: 10px; color: #fff; cursor: pointer;">🎨 Deform (DN)</div>
+            </div>
+            <div class="description">
+                <strong>Context Menu:</strong> Right-click menu with icons and descriptions.
+                <div class="pros-cons">
+                    <div class="pros">✓ Clear descriptions</div>
+                    <div class="pros">✓ Familiar interaction</div>
+                    <div class="cons">✗ Requires right-click</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Hotkey Menu -->
+        <div class="demo-section">
+            <div class="demo-title">Hotkey Menu</div>
+            <div style="background: #333; border: 1px solid #555; padding: 8px; width: 150px;">
+                <div style="padding: 2px 0; font-size: 9px; color: #ccc;">
+                    <span style="background: #555; padding: 2px 4px; border-radius: 2px; margin-right: 8px;">G</span> Generators
+                </div>
+                <div style="padding: 2px 0; font-size: 9px; color: #ccc;">
+                    <span style="background: #555; padding: 2px 4px; border-radius: 2px; margin-right: 8px;">C</span> Constants
+                </div>
+                <div style="padding: 2px 0; font-size: 9px; color: #ccc;">
+                    <span style="background: #555; padding: 2px 4px; border-radius: 2px; margin-right: 8px;">M</span> Math
+                </div>
+                <div style="padding: 2px 0; font-size: 9px; color: #ccc;">
+                    <span style="background: #555; padding: 2px 4px; border-radius: 2px; margin-right: 8px;">U</span> Utility
+                </div>
+                <div style="padding: 2px 0; font-size: 9px; color: #ccc;">
+                    <span style="background: #555; padding: 2px 4px; border-radius: 2px; margin-right: 8px;">D</span> Deform
+                </div>
+            </div>
+            <div class="description">
+                <strong>Hotkey Menu:</strong> Keyboard shortcuts with visual reference.
+                <div class="pros-cons">
+                    <div class="pros">✓ Fastest interaction</div>
+                    <div class="pros">✓ No mouse required</div>
+                    <div class="cons">✗ Learning curve</div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+    
+    <div style="margin-top: 40px; padding: 20px; background: #2a2a2a; border: 1px solid #444;">
+        <h3 style="color: #fff; margin-top: 0;">Recommendation for Node Editor:</h3>
+        <div style="font-size: 12px; line-height: 1.5;">
+            <p><strong>Best Option: Compact Toolbar + Hotkeys</strong></p>
+            <ul>
+                <li>Small, always-visible toolbar with category colors</li>
+                <li>Single-letter hotkeys (G, C, M, U, D) for speed</li>
+                <li>Tooltips showing full category names</li>
+                <li>Consistent with existing UI compactness</li>
+                <li>Easy to implement and maintain</li>
+            </ul>
+        </div>
+    </div>
+    
+</body>
+</html> 
