@@ -8,16 +8,194 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
+        /* CSS Custom Properties for UI Variations */
+        :root {
+            /* Font Variations */
+            --ui-font-family-primary: 'JetBrains Mono', 'Consolas', 'Monaco', monospace;
+            --ui-font-family-secondary: 'Inter', 'Segoe UI', 'Roboto', sans-serif;
+            --ui-font-family-display: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', monospace;
+            
+            /* Font Size Variations */
+            --ui-font-size-xs: 6px;
+            --ui-font-size-sm: 8px;
+            --ui-font-size-md: 10px;
+            --ui-font-size-lg: 12px;
+            --ui-font-size-xl: 14px;
+            --ui-font-size-2xl: 16px;
+            --ui-font-size-3xl: 18px;
+            
+            /* Font Weight Variations */
+            --ui-font-weight-light: 300;
+            --ui-font-weight-normal: 400;
+            --ui-font-weight-medium: 500;
+            --ui-font-weight-semibold: 600;
+            --ui-font-weight-bold: 700;
+            
+            /* Color Variations - Dark Theme */
+            --ui-color-bg-primary: rgba(42, 42, 42, 0.95);
+            --ui-color-bg-secondary: rgba(51, 51, 51, 0.8);
+            --ui-color-bg-tertiary: rgba(34, 34, 34, 0.8);
+            --ui-color-bg-hover: rgba(60, 60, 60, 0.9);
+            --ui-color-bg-selected: rgba(0, 255, 255, 0.3);
+            
+            --ui-color-border-primary: #555;
+            --ui-color-border-secondary: #666;
+            --ui-color-border-hover: #888;
+            --ui-color-border-selected: #00ffff;
+            
+            --ui-color-text-primary: #ccc;
+            --ui-color-text-secondary: #888;
+            --ui-color-text-tertiary: #666;
+            --ui-color-text-accent: #00ffff;
+            --ui-color-text-warning: #ff9900;
+            --ui-color-text-error: #ff4444;
+            
+            /* Color Variations - Light Theme */
+            --ui-color-bg-primary-light: rgba(248, 248, 248, 0.95);
+            --ui-color-bg-secondary-light: rgba(240, 240, 240, 0.8);
+            --ui-color-bg-tertiary-light: rgba(230, 230, 230, 0.8);
+            --ui-color-bg-hover-light: rgba(220, 220, 220, 0.9);
+            --ui-color-bg-selected-light: rgba(0, 150, 255, 0.2);
+            
+            --ui-color-border-primary-light: #ddd;
+            --ui-color-border-secondary-light: #ccc;
+            --ui-color-border-hover-light: #999;
+            --ui-color-border-selected-light: #0066cc;
+            
+            --ui-color-text-primary-light: #333;
+            --ui-color-text-secondary-light: #666;
+            --ui-color-text-tertiary-light: #999;
+            --ui-color-text-accent-light: #0066cc;
+            --ui-color-text-warning-light: #cc6600;
+            --ui-color-text-error-light: #cc0000;
+            
+            /* Spacing Variations */
+            --ui-spacing-xs: 2px;
+            --ui-spacing-sm: 4px;
+            --ui-spacing-md: 6px;
+            --ui-spacing-lg: 8px;
+            --ui-spacing-xl: 12px;
+            --ui-spacing-2xl: 16px;
+            
+            /* Border Radius Variations */
+            --ui-border-radius-none: 0px;
+            --ui-border-radius-sm: 1px;
+            --ui-border-radius-md: 2px;
+            --ui-border-radius-lg: 4px;
+            --ui-border-radius-xl: 6px;
+            --ui-border-radius-full: 25%;
+            
+            /* Shadow Variations */
+            --ui-shadow-sm: 0 1px 1px rgba(0, 0, 0, 0.2);
+            --ui-shadow-md: 0 1px 2px rgba(0, 0, 0, 0.3);
+            --ui-shadow-lg: 0 2px 4px rgba(0, 0, 0, 0.4);
+            --ui-shadow-xl: 0 3px 6px rgba(0, 0, 0, 0.5);
+            
+            /* Blur Variations */
+            --ui-blur-sm: blur(4px);
+            --ui-blur-md: blur(8px);
+            --ui-blur-lg: blur(12px);
+            
+            /* Animation Variations */
+            --ui-transition-fast: 0.15s ease;
+            --ui-transition-normal: 0.3s ease;
+            --ui-transition-slow: 0.5s ease;
+            
+            /* Opacity Variations */
+            --ui-opacity-disabled: 0.5;
+            --ui-opacity-hover: 0.8;
+            --ui-opacity-active: 1.0;
+        }
+        
+        /* Theme Classes */
+        .ui-theme-dark {
+            --ui-bg: var(--ui-color-bg-primary);
+            --ui-bg-secondary: var(--ui-color-bg-secondary);
+            --ui-bg-tertiary: var(--ui-color-bg-tertiary);
+            --ui-bg-hover: var(--ui-color-bg-hover);
+            --ui-bg-selected: var(--ui-color-bg-selected);
+            
+            --ui-border: var(--ui-color-border-primary);
+            --ui-border-secondary: var(--ui-color-border-secondary);
+            --ui-border-hover: var(--ui-color-border-hover);
+            --ui-border-selected: var(--ui-color-border-selected);
+            
+            --ui-text-color: var(--ui-color-text-primary);
+            --ui-text-secondary: var(--ui-color-text-secondary);
+            --ui-text-tertiary: var(--ui-color-text-tertiary);
+            --ui-text-accent: var(--ui-color-text-accent);
+            --ui-text-warning: var(--ui-color-text-warning);
+            --ui-text-error: var(--ui-color-text-error);
+        }
+        
+        .ui-theme-light {
+            --ui-bg: var(--ui-color-bg-primary-light);
+            --ui-bg-secondary: var(--ui-color-bg-secondary-light);
+            --ui-bg-tertiary: var(--ui-color-bg-tertiary-light);
+            --ui-bg-hover: var(--ui-color-bg-hover-light);
+            --ui-bg-selected: var(--ui-color-bg-selected-light);
+            
+            --ui-border: var(--ui-color-border-primary-light);
+            --ui-border-secondary: var(--ui-color-border-secondary-light);
+            --ui-border-hover: var(--ui-color-border-hover-light);
+            --ui-border-selected: var(--ui-color-border-selected-light);
+            
+            --ui-text-color: var(--ui-color-text-primary-light);
+            --ui-text-secondary: var(--ui-color-text-secondary-light);
+            --ui-text-tertiary: var(--ui-color-text-tertiary-light);
+            --ui-text-accent: var(--ui-color-text-accent-light);
+            --ui-text-warning: var(--ui-color-text-warning-light);
+            --ui-text-error: var(--ui-color-text-error-light);
+        }
+        
+        /* Common UI Panel */
+        .ui-panel {
+            background: var(--ui-bg);
+            border: none;
+            border-radius: var(--ui-border-radius-none);
+            backdrop-filter: var(--ui-blur-md);
+            box-shadow: var(--ui-shadow-md);
+            padding: var(--ui-spacing-sm);
+        }
+        
+
+        
+        .ui-panel-content {
+            padding: var(--ui-spacing-sm);
+            font-family: var(--ui-font-family-primary);
+        }
+        
         body {
             margin: 0;
             padding: 0;
             overflow: hidden;
-            font-family: 'JetBrains Mono', Consolas, 'Courier New', monospace;
+            font-family: var(--ui-font-family-primary);
             background: #1a1a1a;
             -webkit-user-select: none;
             -moz-user-select: none;
             -ms-user-select: none;
             user-select: none;
+        }
+        
+        /* Apply dark theme by default */
+        body {
+            --ui-bg: var(--ui-color-bg-primary);
+            --ui-bg-secondary: var(--ui-color-bg-secondary);
+            --ui-bg-tertiary: var(--ui-color-bg-tertiary);
+            --ui-bg-hover: var(--ui-color-bg-hover);
+            --ui-bg-selected: var(--ui-color-bg-selected);
+            
+            --ui-border: var(--ui-color-border-primary);
+            --ui-border-secondary: var(--ui-color-border-secondary);
+            --ui-border-hover: var(--ui-color-border-hover);
+            --ui-border-selected: var(--ui-color-border-selected);
+            
+            --ui-text-color: var(--ui-color-text-primary);
+            --ui-text-secondary: var(--ui-color-text-secondary);
+            --ui-text-tertiary: var(--ui-color-text-tertiary);
+            --ui-text-accent: var(--ui-color-text-accent);
+            --ui-text-warning: var(--ui-color-text-warning);
+            --ui-text-error: var(--ui-color-text-error);
         }
         
         #app {
@@ -29,11 +207,11 @@
         .context-menu {
             position: absolute;
             display: none;
-            background: rgba(40, 40, 40, 0.95);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            backdrop-filter: blur(10px);
-            padding: 5px;
+            background: var(--ui-bg);
+            border: var(--ui-border);
+            border-radius: var(--ui-border-radius);
+            backdrop-filter: var(--ui-backdrop);
+            padding: var(--ui-padding);
             min-width: 200px;
             pointer-events: all;
             z-index: 1000;
@@ -43,17 +221,103 @@
             display: block;
         }
 
-        .context-menu-item {
-            color: #fff;
-            padding: 8px 12px;
-            font-size: 14px;
+                .context-menu-item {
+            color: var(--ui-text-color);
+            padding: var(--ui-spacing-sm) var(--ui-spacing-sm);
+            font-size: var(--ui-font-size-sm);
             cursor: pointer;
-            border-radius: 4px;
+            border-radius: var(--ui-border-radius-sm);
             white-space: nowrap;
+            font-family: var(--ui-font-family-primary);
+        }
+        
+        .context-menu-item:hover {
+            background: var(--ui-hover-bg);
         }
 
-        .context-menu-item:hover {
-            background: rgba(80, 80, 80, 0.95);
+        /* Node Category Menu */
+        .node-category-menu {
+            position: fixed;
+            display: none;
+            z-index: 2000;
+            pointer-events: none;
+        }
+        
+        .node-category-menu.active {
+            display: block;
+            pointer-events: all;
+        }
+        
+        .category-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--ui-spacing-sm);
+            width: 300px;
+        }
+        
+        .category-rectangle {
+            background: var(--ui-bg-secondary);
+            border: none;
+            border-radius: var(--ui-border-radius-md);
+            padding: var(--ui-spacing-md);
+            cursor: pointer;
+            transition: var(--ui-transition-fast);
+            position: relative;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            font-family: var(--ui-font-family-primary);
+        }
+        
+        .category-rectangle:hover {
+            background: var(--ui-bg-hover);
+            transform: scale(1.02);
+            box-shadow: var(--ui-shadow-sm);
+        }
+        
+        .category-rectangle.selected {
+            background: var(--ui-bg-selected);
+            box-shadow: 0 0 0 1px var(--ui-border-selected);
+        }
+        
+        .category-title {
+            font-size: var(--ui-font-size-sm);
+            font-weight: var(--ui-font-weight-bold);
+            color: var(--ui-text-color);
+            text-transform: uppercase;
+            margin-bottom: var(--ui-spacing-sm);
+            text-align: center;
+            letter-spacing: 0.5px;
+            font-family: var(--ui-font-family-display);
+        }
+        
+        .category-nodes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            justify-content: center;
+        }
+        
+        .node-word {
+            background: var(--ui-bg-tertiary);
+            border: none;
+            border-radius: var(--ui-border-radius-sm);
+            padding: var(--ui-spacing-xs) var(--ui-spacing-sm);
+            font-size: var(--ui-font-size-xs);
+            color: var(--ui-text-color);
+            cursor: pointer;
+            transition: var(--ui-transition-fast);
+            text-align: center;
+            font-family: var(--ui-font-family-primary);
+            font-weight: var(--ui-font-weight-medium);
+        }
+        
+        .node-word:hover {
+            background: var(--ui-bg-selected);
+            color: var(--ui-text-color);
+            transform: scale(1.05);
+            box-shadow: var(--ui-shadow-sm);
         }
 
         /* Color Palette Controls */
@@ -62,72 +326,42 @@
             top: 20px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(30, 30, 30, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid #444;
-            border-radius: 8px;
-            padding: 0;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
             z-index: 1000;
             transition: all 0.3s ease;
         }
         
         .color-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 20px;
-            border-bottom: 1px solid #444;
             cursor: pointer;
             user-select: none;
         }
         
-        .color-title {
-            font-size: 12px;
-            font-weight: 600;
-            color: #ffffff;
-            letter-spacing: 1px;
-        }
-        
-        .color-toggle {
-            background: none;
-            border: none;
-            color: #ffffff;
-            font-size: 12px;
-            cursor: pointer;
-            padding: 0;
-            margin-left: 20px;
-            transition: transform 0.3s ease;
-        }
-        
-        .color-toggle:hover {
-            color: #00ffff;
-        }
+
         
         .color-controls-container {
             display: flex;
             flex-direction: row;
             flex-wrap: wrap;
-            gap: 7px;
-            padding: 5px 8px;
-            transition: max-height 0.3s ease, opacity 0.3s ease;
+            gap: var(--ui-spacing-sm);
+            padding: var(--ui-spacing-sm);
+            transition: var(--ui-transition-normal);
             overflow: hidden;
             max-height: 60px;
             align-items: center;
-            background: #2a2a2a;
-            border: 1px solid #444;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+            background: var(--ui-bg);
+            border: none;
+            box-shadow: var(--ui-shadow-sm);
+            font-family: var(--ui-font-family-primary);
         }
         
         .category-colors {
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: var(--ui-spacing-xs);
         }
         
         .category-list {
             display: flex;
-            gap: 2px;
+            gap: var(--ui-spacing-xs);
         }
         
         .category-item {
@@ -137,19 +371,20 @@
         }
         
         .category-label {
-            font-size: 5px;
-            color: #666;
-            font-weight: 400;
+            font-size: var(--ui-font-size-xs);
+            color: var(--ui-text-tertiary);
+            font-weight: var(--ui-font-weight-normal);
             min-width: 10px;
             text-align: center;
-            margin-left: 2px;
+            margin-left: var(--ui-spacing-xs);
+            font-family: var(--ui-font-family-primary);
         }
         
         .category-color-picker {
             width: 21px;
             height: 15px;
-            border: 1px solid #555;
-            border-radius: 0px;
+            border: none;
+            border-radius: var(--ui-border-radius);
             cursor: pointer;
             background: transparent;
             padding: 0;
@@ -182,29 +417,27 @@
         
 
         
-        .color-controls-container.collapsed {
-            max-height: 0;
-            padding: 0 20px;
-            opacity: 0;
-        }
+
         
 
         
         .color-reset {
             background: none;
-            border: 1px solid #555;
-            color: #ccc;
-            padding: 3px 6px;
-            border-radius: 0px;
+            border: none;
+            color: var(--ui-text-color);
+            padding: var(--ui-spacing-xs) var(--ui-spacing-sm);
+            border-radius: var(--ui-border-radius-none);
             cursor: pointer;
-            font-size: 7px;
-            transition: all 0.2s ease;
+            font-size: var(--ui-font-size-xs);
+            transition: var(--ui-transition-fast);
             white-space: nowrap;
+            font-family: var(--ui-font-family-primary);
+            font-weight: var(--ui-font-weight-medium);
         }
         
         .color-reset:hover {
-            border-color: #00ffff;
-            color: #00ffff;
+            color: var(--ui-text-accent);
+            transform: scale(1.05);
         }
 
         /* Physics Controls */
@@ -213,77 +446,43 @@
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(30, 30, 30, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid #444;
-            border-radius: 8px;
-            padding: 0;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
             z-index: 1000;
             transition: all 0.3s ease;
         }
         
         .physics-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 20px;
-            border-bottom: 1px solid #444;
             cursor: pointer;
             user-select: none;
         }
         
-        .physics-title {
-            font-size: 12px;
-            font-weight: 600;
-            color: #ffffff;
-            letter-spacing: 1px;
-        }
-        
-        .physics-toggle {
-            background: none;
-            border: none;
-            color: #ffffff;
-            font-size: 12px;
-            cursor: pointer;
-            padding: 0;
-            margin-left: 20px;
-            transition: transform 0.3s ease;
-        }
-        
-        .physics-toggle:hover {
-            color: #00ffff;
-        }
+
         
         .physics-controls-container {
             display: flex;
-            gap: 20px;
+            gap: var(--ui-spacing-xl);
             align-items: center;
-            padding: 15px 20px;
-            transition: max-height 0.3s ease, opacity 0.3s ease;
+            padding: var(--ui-spacing-md) var(--ui-spacing-xl);
+            transition: var(--ui-transition-normal);
             overflow: hidden;
             max-height: 200px;
         }
         
-        .physics-controls-container.collapsed {
-            max-height: 0;
-            padding: 0 20px;
-            opacity: 0;
-        }
+
 
         .physics-control {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 5px;
+            gap: var(--ui-spacing-xs);
         }
 
         .physics-control label {
-            font-size: 11px;
-            color: #cccccc;
-            font-weight: 500;
+            font-size: var(--ui-font-size-sm);
+            color: var(--ui-text-color);
+            font-weight: var(--ui-font-weight-medium);
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            font-family: var(--ui-font-family-primary);
         }
 
         .physics-control input[type="range"] {
@@ -311,11 +510,12 @@
         }
 
         .physics-value {
-            font-size: 10px;
-            color: #00aaff;
-            font-weight: 600;
+            font-size: var(--ui-font-size-sm);
+            color: var(--ui-text-accent);
+            font-weight: var(--ui-font-weight-semibold);
             min-width: 30px;
             text-align: center;
+            font-family: var(--ui-font-family-primary);
         }
         
         .physics-note {
@@ -323,19 +523,114 @@
             bottom: -20px;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 10px;
-            color: #888;
+            font-size: var(--ui-font-size-sm);
+            color: var(--ui-text-secondary);
             font-style: italic;
             white-space: nowrap;
+            font-family: var(--ui-font-family-primary);
         }
         
         .info {
             position: absolute;
-            top: 10px;
-            left: 10px;
-            color: #666;
-            font-size: 12px;
+            top: var(--ui-spacing-sm);
+            left: var(--ui-spacing-sm);
+            color: var(--ui-text-tertiary);
+            font-size: var(--ui-font-size-md);
             user-select: none;
+            font-family: var(--ui-font-family-primary);
+            font-weight: var(--ui-font-weight-normal);
+        }
+        
+        /* Theme Toggle Styles */
+        .theme-toggle {
+            position: fixed;
+            top: var(--ui-spacing-lg);
+            right: var(--ui-spacing-lg);
+            z-index: 1000;
+        }
+        
+        .theme-toggle-btn {
+            background: var(--ui-bg);
+            border: none;
+            border-radius: var(--ui-border-radius-md);
+            padding: var(--ui-spacing-sm) var(--ui-spacing-md);
+            color: var(--ui-text-color);
+            cursor: pointer;
+            font-family: var(--ui-font-family-primary);
+            font-size: var(--ui-font-size-sm);
+            font-weight: var(--ui-font-weight-medium);
+            transition: var(--ui-transition-fast);
+            display: flex;
+            align-items: center;
+            gap: var(--ui-spacing-xs);
+            backdrop-filter: var(--ui-blur-md);
+            box-shadow: var(--ui-shadow-sm);
+        }
+        
+        .theme-toggle-btn:hover {
+            background: var(--ui-bg-hover);
+            transform: scale(1.05);
+        }
+        
+        .theme-icon {
+            font-size: var(--ui-font-size-md);
+        }
+        
+        .theme-text {
+            font-family: var(--ui-font-family-display);
+            font-weight: var(--ui-font-weight-semibold);
+            letter-spacing: 0.5px;
+        }
+        
+        /* Logo Styles */
+        .logo-container {
+            position: fixed;
+            bottom: var(--ui-spacing-xl);
+            left: var(--ui-spacing-xl);
+            z-index: 999;
+        }
+        
+        .logo {
+            width: 64px;
+            height: 64px;
+            object-fit: contain;
+            opacity: 0.9;
+            transition: var(--ui-transition-fast);
+            filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.4));
+        }
+        
+        .logo:hover {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+        
+        /* Logo theme adaptations */
+        .ui-theme-light .logo {
+            filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.25)) brightness(0.95);
+        }
+        
+        .ui-theme-dark .logo {
+            filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.5)) brightness(1.1);
+        }
+        
+        /* Responsive logo behavior */
+        @media (max-width: 768px) {
+            .logo {
+                width: 48px;
+                height: 48px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .logo {
+                width: 40px;
+                height: 40px;
+            }
+            
+            .logo-container {
+                bottom: var(--ui-spacing-md);
+                left: var(--ui-spacing-md);
+            }
         }
         
         .preview-window {
@@ -346,7 +641,7 @@
             height: 256px;
             background: rgba(30, 30, 30, 0.95);
             border: 2px solid rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
+            border-radius: 4px;
             display: none;
             flex-direction: column;
             backdrop-filter: blur(10px);
@@ -447,7 +742,7 @@
         .preview-header {
             padding: 10px;
             background: rgba(40, 40, 40, 0.8);
-            border-radius: 8px 8px 0 0;
+            border-radius: 4 4 0 0;
             color: #fff;
             font-size: 14px;
             font-weight: 500;
@@ -549,13 +844,14 @@
             position: absolute;
             top: -20px;
             right: 0;
-            font-size: 8px;
+            font-size: var(--ui-font-size-xs);
             color: rgba(255, 255, 255, 0.9);
             background: rgba(0, 0, 0, 0.7);
-            padding: 2px 4px;
-            border-radius: 2px;
-            transition: opacity 0.2s ease;
+            padding: var(--ui-spacing-xs) var(--ui-spacing-xs);
+            border-radius: var(--ui-border-radius-sm);
+            transition: var(--ui-transition-fast);
             pointer-events: none;
+            font-family: var(--ui-font-family-primary);
         }
         
         .parameter-input {
@@ -563,17 +859,18 @@
             top: -25px;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 10px;
-            color: #fff;
-            background: rgba(40, 40, 40, 0.9);
+            font-size: var(--ui-font-size-sm);
+            color: var(--ui-text-color);
+            background: var(--ui-bg-tertiary);
             border: none;
-            border-radius: 3px;
-            padding: 3px 6px;
+            border-radius: var(--ui-border-radius-sm);
+            padding: var(--ui-spacing-xs) var(--ui-spacing-sm);
             width: 50px;
             text-align: center;
             outline: none;
             -webkit-appearance: none;
             -moz-appearance: textfield;
+            font-family: var(--ui-font-family-primary);
         }
         
         .parameter-input::-webkit-outer-spin-button,
@@ -594,8 +891,85 @@
 <body>
     <div id="app"></div>
     <div class="context-menu" id="contextMenu"></div>
+    
+    <!-- Node Category Menu -->
+    <div class="node-category-menu ui-panel" id="nodeCategoryMenu">
+        <div class="category-grid">
+            <div class="category-rectangle" data-category="GN">
+                <div class="category-title">Generators</div>
+                <div class="category-nodes">
+                    <div class="node-word" data-name="noise">Noise</div>
+                    <div class="node-word" data-name="checker">Checker</div>
+                    <div class="node-word" data-name="gradient">Gradient</div>
+                    <div class="node-word" data-name="voronoi">Voronoi</div>
+                </div>
+            </div>
+            
+            <div class="category-rectangle" data-category="CN">
+                <div class="category-title">Constants</div>
+                <div class="category-nodes">
+                    <div class="node-word" data-name="color">Color</div>
+                    <div class="node-word" data-name="uniform">Uniform</div>
+                    <div class="node-word" data-name="value">Value</div>
+                    <div class="node-word" data-name="vector">Vector</div>
+                </div>
+            </div>
+            
+            <div class="category-rectangle" data-category="MN">
+                <div class="category-title">Math</div>
+                <div class="category-nodes">
+                    <div class="node-word" data-name="add">Add</div>
+                    <div class="node-word" data-name="multiply">Multiply</div>
+                    <div class="node-word" data-name="subtract">Subtract</div>
+                    <div class="node-word" data-name="divide">Divide</div>
+                </div>
+            </div>
+            
+            <div class="category-rectangle" data-category="UN">
+                <div class="category-title">Utility</div>
+                <div class="category-nodes">
+                    <div class="node-word" data-name="mix">Mix</div>
+                    <div class="node-word" data-name="clamp">Clamp</div>
+                    <div class="node-word" data-name="map">Map</div>
+                </div>
+            </div>
+            
+            <div class="category-rectangle" data-category="DN">
+                <div class="category-title">Deform</div>
+                <div class="category-nodes">
+                    <div class="node-word" data-name="warp">Warp</div>
+                    <div class="node-word" data-name="distort">Distort</div>
+                    <div class="node-word" data-name="twist">Twist</div>
+                    <div class="node-word" data-name="bend">Bend</div>
+                </div>
+            </div>
+            
+            <div class="category-rectangle" data-category="FX">
+                <div class="category-title">Effects</div>
+                <div class="category-nodes">
+                    <div class="node-word" data-name="blur">Blur</div>
+                    <div class="node-word" data-name="sharpen">Sharpen</div>
+                    <div class="node-word" data-name="emboss">Emboss</div>
+                    <div class="node-word" data-name="noise">Noise</div>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="info">
-        Right-click to create nodes • Drag to connect • Scroll to zoom • Middle-click to pan
+        Right-click to create nodes • Drag to connect • Scroll to zoom • Middle-click to pan • Auto-saves progress • Escape to hide parameters • Ctrl+Shift+N to clear
+    </div>
+    
+    <!-- Theme Toggle Button -->
+    <div class="theme-toggle">
+        <button id="themeToggle" class="theme-toggle-btn">
+            <span class="theme-icon">🌙</span>
+            <span class="theme-text">Dark</span>
+        </button>
+    </div>
+    
+    <!-- Logo -->
+    <div class="logo-container">
+        <img src="./assets/logo.png" alt="TK Logo" class="logo" />
     </div>
     <div class="preview-window" id="previewWindow">
         <div class="preview-header" id="previewHeader">Node Output</div>
@@ -611,15 +985,11 @@
         <div class="resize-handle resize-se"></div>
     </div>
 
-    <div class="color-panel">
-        <div class="color-header">
-            <span class="color-title">NODE COLORS</span>
-            <button class="color-toggle" id="colorToggle">▼</button>
-        </div>
-        <div class="color-controls-container" id="colorControlsContainer">
+    <div class="color-panel ui-panel">
+        <div class="color-controls-container ui-panel-content" id="colorControlsContainer">
             <!-- Palette Selector -->
-            <div class="palette-section" style="display: flex; align-items: center; gap: 8px;">
-                <select id="paletteSelector" style="width: 140px; padding: 4px 6px; background: #333; color: #fff; border: 1px solid #555; border-radius: 3px; font-size: 11px;">
+            <div class="palette-section" style="display: flex; align-items: center; gap: var(--ui-spacing-sm);">
+                <select id="paletteSelector" style="width: 140px; padding: var(--ui-spacing-xs) var(--ui-spacing-sm); background: var(--ui-bg-secondary); color: var(--ui-text-color); border: none; border-radius: var(--ui-border-radius-sm); font-size: var(--ui-font-size-sm); font-family: var(--ui-font-family-primary);">
                     <option value="material">Material</option>
                     <option value="tailwind">Tailwind</option>
                     <option value="github">GitHub</option>
@@ -662,7 +1032,7 @@
             </div>
             
             <!-- Interaction Colors -->
-            <div class="interaction-colors" style="display: flex; gap: 4px;">
+            <div class="interaction-colors" style="display: flex; gap: var(--ui-spacing-xs);">
                 <div class="category-item">
                     <input type="color" class="category-color-picker" id="colorHover" value="#00FFFF" title="Hover">
                     <span class="category-label">H</span>
@@ -674,10 +1044,10 @@
             </div>
             
             <!-- Saturation Control -->
-            <div class="saturation-control" style="display: flex; align-items: center; gap: 3px;">
-                <span style="color: #888; font-size: 7px; min-width: 9px;">S:</span>
+            <div class="saturation-control" style="display: flex; align-items: center; gap: var(--ui-spacing-xs);">
+                <span style="color: var(--ui-text-tertiary); font-size: var(--ui-font-size-xs); min-width: 9px; font-family: var(--ui-font-family-primary);">S:</span>
                 <input type="range" id="saturationSlider" min="0" max="100" value="100" style="width: 45px; height: 3px; background: linear-gradient(to right, #666, #ff0000); border-radius: 0px; outline: none; -webkit-appearance: none;">
-                <span id="saturationValue" style="color: #aaa; font-size: 7px; min-width: 22px;">100%</span>
+                <span id="saturationValue" style="color: var(--ui-text-secondary); font-size: var(--ui-font-size-xs); min-width: 22px; font-family: var(--ui-font-family-primary);">100%</span>
             </div>
             
 
@@ -685,16 +1055,12 @@
 
             
             <!-- Reset Button -->
-            <button class="color-reset" id="colorReset" style="padding: 3px 6px; font-size: 7px;">Reset</button>
+            <button class="color-reset" id="colorReset" style="padding: var(--ui-spacing-xs) var(--ui-spacing-sm); font-size: var(--ui-font-size-xs);">Reset</button>
         </div>
     </div>
 
-    <div class="physics-panel">
-        <div class="physics-header">
-            <span class="physics-title">WIRE PHYSICS</span>
-            <button class="physics-toggle" id="physicsToggle">▼</button>
-        </div>
-        <div class="physics-controls-container" id="physicsControlsContainer">
+    <div class="physics-panel ui-panel">
+        <div class="physics-controls-container ui-panel-content" id="physicsControlsContainer">
         <div class="physics-control">
             <label>Min Stiffness (Long Wires)</label>
             <input type="range" id="minStiffnessSlider" min="0.01" max="0.5" step="0.05" value="0.1">
@@ -707,22 +1073,22 @@
         </div>
         <div class="physics-control">
             <label>Stiffness Bias (Gradient Shape)</label>
-            <input type="range" id="stiffnessBiasSlider" min="0.1" max="8.0" step="0.1" value="0.25">
+            <input type="range" id="stiffnessBiasSlider" min="0.1" max="8.0" step="0.1" value="2.0">
             <div class="physics-value" id="stiffnessBiasValue">2.0</div>
         </div>
         <div class="physics-control">
             <label>Damping</label>
-            <input type="range" id="dampingSlider" min="0.5" max="0.99" step="0.01" value="0.3">
+            <input type="range" id="dampingSlider" min="0.5" max="0.99" step="0.01" value="0.85">
             <div class="physics-value" id="dampingValue">0.85</div>
         </div>
         <div class="physics-control">
             <label>Gravity</label>
-            <input type="range" id="gravitySlider" min="0" max="10.0" step="0.1" value="2.5">
+            <input type="range" id="gravitySlider" min="0" max="10.0" step="0.1" value="0.5">
             <div class="physics-value" id="gravityValue">0.5</div>
         </div>
         <div class="physics-control">
             <label>Sag</label>
-            <input type="range" id="sagSlider" min="1" max="200" step="5" value="43">
+            <input type="range" id="sagSlider" min="1" max="200" step="5" value="20">
             <div class="physics-value" id="sagValue">20</div>
         </div>
         <div class="physics-control">
@@ -771,6 +1137,9 @@
         window.parameterInteractionInProgress = false;
         window.globalNodeTint = 0xffffff; // Default to white (no tint)
         
+        // Make save function globally available for parameter system
+        window.saveNodeGraph = () => saveGraph();
+        
         document.getElementById('app').appendChild(app.view);
         
         // Container for the entire scene
@@ -801,6 +1170,9 @@
         // Node storage
         const nodes = [];
         const wires = [];
+        
+        // Graph persistence
+        let nodeIdCounter = 0; // For assigning unique IDs to nodes
         
         // Interaction state
         let selectedNode = null;
@@ -892,6 +1264,34 @@
             wirePoints: 12
         };
 
+        // Theme switching functionality
+        function toggleTheme() {
+            const body = document.body;
+            const themeToggle = document.getElementById('themeToggle');
+            const themeIcon = themeToggle.querySelector('.theme-icon');
+            const themeText = themeToggle.querySelector('.theme-text');
+            
+            if (body.classList.contains('ui-theme-light')) {
+                // Switch to dark theme
+                body.classList.remove('ui-theme-light');
+                body.classList.add('ui-theme-dark');
+                themeIcon.textContent = '🌙';
+                themeText.textContent = 'Dark';
+            } else {
+                // Switch to light theme
+                body.classList.remove('ui-theme-dark');
+                body.classList.add('ui-theme-light');
+                themeIcon.textContent = '☀️';
+                themeText.textContent = 'Light';
+            }
+            
+            // Save theme change
+            saveGraph();
+        }
+        
+        // Add theme toggle event listener
+        document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+        
         // Wait for DOM to be ready before initializing
         window.addEventListener('DOMContentLoaded', async () => {
             try {
@@ -913,14 +1313,27 @@
                 drawGrid();
                 console.log('Grid drawn');
                 
-                // Create some example nodes
-                console.log('Creating nodes...');
-                console.log('Available node types:', Object.keys(nodeTypes));
-                const noise1 = new Node('noise', -200, -100, textures);
-                const checker = new Node('checker', -200, 100, textures);
-                const blend = new Node('blend', 100, 0, textures);
-                const output = new Node('container', 400, 0, textures);
-                console.log('Nodes created:', { noise1, checker, blend, output });
+                // Try to load saved graph, or create example nodes if none exists
+                const graphLoaded = loadGraph();
+                
+                if (!graphLoaded) {
+                    console.log('Creating example nodes...');
+                    console.log('Available node types:', Object.keys(nodeTypes));
+                    const noise1 = new Node('noise', -200, -100, textures);
+                    const checker = new Node('checker', -200, 100, textures);
+                    const mix = new Node('mix', 100, 0, textures);
+                    const output = new Node('container', 400, 0, textures);
+                    console.log('Nodes created:', { noise1, checker, mix, output });
+                    
+                    // Connect them
+                    setTimeout(() => {
+                        console.log('Creating wires...');
+                        createWire(noise1.outputs[0], mix.inputs[0]);
+                        createWire(checker.outputs[0], mix.inputs[1]);
+                        createWire(mix.outputs[0], output.inputs[0]);
+                        console.log('Wires created');
+                    }, 100);
+                }
                 
                 // Apply initial category colors
                 updateNodeCategoryColors();
@@ -928,15 +1341,6 @@
                 // Apply initial interaction colors
                 setTimeout(() => {
                     updateInteractionColors();
-                }, 100);
-                
-                // Connect them
-                setTimeout(() => {
-                    console.log('Creating wires...');
-                    createWire(noise1.outputs[0], blend.inputs[0]);
-                    createWire(checker.outputs[0], blend.inputs[1]);
-                    createWire(blend.outputs[0], output.inputs[0]);
-                    console.log('Wires created');
                 }, 100);
             } catch (error) {
                 console.error('Error during initialization:', error);
@@ -970,7 +1374,7 @@
         
         // Create node class
         class Node {
-            constructor(type, x, y, textures) {
+            constructor(type, x, y, textures, id = null) {
                 console.log('Creating node:', type, 'at', x, y, 'nodeTypes:', Object.keys(nodeTypes));
                 this.type = type;
                 this.config = nodeTypes[type];
@@ -978,6 +1382,7 @@
                     console.error('Node type not found:', type, 'Available types:', Object.keys(nodeTypes));
                     throw new Error(`Node type '${type}' not found`);
                 }
+                this.id = id !== null ? id : ++nodeIdCounter; // Assign unique ID
                 this.x = x;
                 this.y = y;
                 this.width = this.config.width || nodeConfig.width;
@@ -998,12 +1403,14 @@
                 this.container.x = x;
                 this.container.y = y;
                 this.container.interactive = true;
-                this.container.eventMode = 'static'; // Ensures events work properly
                 this.container.cursor = 'pointer';
                 this.container.interactiveChildren = true; // Allow children to receive events
-                // Expand hitArea to include parameter panel area below the node
-                const parameterHeight = 80; // Space for parameters below
+                
+                // Use a different approach: make node only respond to clicks on empty areas
+                // Parameters will handle their own events through their individual hitAreas
+                const parameterHeight = 200; // Increased to cover more parameters
                 this.container.hitArea = new PIXI.Rectangle(0, 0, this.width * nodeConfig.scale, this.height * nodeConfig.scale + parameterHeight);
+                this.container.eventMode = 'static'; // Keep static for node dragging
                 
 
 
@@ -1039,9 +1446,13 @@
                 this.draw();
                 this.setupInteraction();
                 
-
-                
+                // Create parameter panel AFTER all node sprites are added
                 this.parameterSystem.createParameterPanel();
+                
+                // Ensure parameter panel is on top (above all node sprites)
+                if (this.parameterSystem.parameterPanel) {
+                    this.container.setChildIndex(this.parameterSystem.parameterPanel, this.container.children.length - 1);
+                }
                 
                 nodesContainer.addChild(this.container);
                 nodes.push(this);
@@ -1081,18 +1492,18 @@
 
 
                 // Add thumbnail preview in the center of the node
-                if (previewTextures[this.type]) {
-                    const thumbnail = new PIXI.Sprite(previewTextures[this.type]);
-                    const thumbnailSize = Math.min(this.width * 0.66, this.height * 0.66) * nodeConfig.scale;
-                    thumbnail.width = thumbnailSize;
-                    thumbnail.height = thumbnailSize;
-                    thumbnail.x = (this.width * nodeConfig.scale) / 2;
-                    thumbnail.y = (this.height * nodeConfig.scale) / 2;
-                    thumbnail.anchor.set(0.5);
-                    thumbnail.alpha = 0.8; // Slightly transparent so it doesn't overwhelm
-                    thumbnail.eventMode = 'none'; // Don't block parameter events
-                    this.container.addChild(thumbnail);
-                }
+                // Use a placeholder texture initially - will be updated when output texture is generated
+                let initialTexture = previewTextures[this.type] || PIXI.Texture.WHITE;
+                this.thumbnail = new PIXI.Sprite(initialTexture);
+                const thumbnailSize = Math.min(this.width * 0.66, this.height * 0.66) * nodeConfig.scale;
+                this.thumbnail.width = thumbnailSize;
+                this.thumbnail.height = thumbnailSize;
+                this.thumbnail.x = (this.width * nodeConfig.scale) / 2;
+                this.thumbnail.y = (this.height * nodeConfig.scale) / 2;
+                this.thumbnail.anchor.set(0.5);
+                this.thumbnail.alpha = 0.8; // Slightly transparent so it doesn't overwhelm
+                this.thumbnail.eventMode = 'none'; // Don't block parameter events
+                this.container.addChild(this.thumbnail);
                 
                 // Input ports
                 
@@ -1221,6 +1632,7 @@
                     this.hoverOutline.animationSpeed = nodeConfig.fadeOutSpeed;
                     
                     // Show parameter panel
+                    console.log('Showing parameter panel for node:', this.type);
                     this.parameterSystem.showParameterPanel();
                     
                     // Show preview
@@ -1234,9 +1646,23 @@
                     // Clear previous content
                     content.innerHTML = '';
                     
-                    // Add preview image
+                    // Add preview image - use actual node output texture
                     const img = document.createElement('img');
-                    img.src = previewTextures[this.type].baseTexture.resource.source.toDataURL();
+                    if (this.outputTexture && this.outputTexture.baseTexture && this.outputTexture.baseTexture.resource) {
+                        // Use the actual generated texture from this node
+                        img.src = this.outputTexture.baseTexture.resource.source.toDataURL();
+                        console.log('Preview: Using actual node output texture for', this.type);
+                    } else {
+                        // Fallback to static preview if no output texture exists
+                        console.log('Preview: No output texture found, using static preview for', this.type);
+                        if (previewTextures[this.type]) {
+                            img.src = previewTextures[this.type].baseTexture.resource.source.toDataURL();
+                        } else {
+                            // Generate texture on demand if needed
+                            this.updateNodeTexture();
+                            return; // Exit early, updateNodeTexture will handle the preview update
+                        }
+                    }
                     img.style.width = '100%';
                     img.style.height = '100%';
                     img.style.objectFit = 'contain';
@@ -1250,6 +1676,7 @@
                     this.hoverOutline.animationSpeed = nodeConfig.fadeOutSpeed;
                     
                     // Hide parameter panel
+                    console.log('Hiding parameter panel for node:', this.type);
                     this.parameterSystem.hideParameterPanel();
                     
                     // Hide preview if this was the selected node
@@ -1278,9 +1705,9 @@
                         this.outputTexture = newTexture; // Store on this node instance
                         
                         // Update thumbnail
-                        const thumbnail = this.container.children.find(child => child instanceof PIXI.Sprite);
-                        if (thumbnail) {
-                            thumbnail.texture = newTexture;
+                        if (this.thumbnail) {
+                            this.thumbnail.texture = newTexture;
+                            console.log('Thumbnail updated with processed texture for node:', this.type);
                         }
                         
                         // Update preview window
@@ -1297,9 +1724,9 @@
                 this.outputTexture = newTexture; // Store on this node instance
                 
                 // Update the node's thumbnail if it exists
-                const thumbnail = this.container.children.find(child => child instanceof PIXI.Sprite);
-                if (thumbnail) {
-                    thumbnail.texture = newTexture;
+                if (this.thumbnail) {
+                    this.thumbnail.texture = newTexture;
+                    console.log('Thumbnail updated with generated texture for node:', this.type);
                 }
                 
                 // Update preview window if this node is selected
@@ -1540,8 +1967,12 @@
         function onDragStart(event, node) {
             nodeInteractionInProgress = true;
             
+            // Reset parameter interaction flag when starting new node interaction
+            window.parameterInteractionInProgress = false;
+            
             // Deselect previous node
             if (selectedNode && selectedNode !== node) {
+                console.log('Deselecting previous node:', selectedNode.type, 'and selecting:', node.type);
                 selectedNode.setSelected(false);
             }
             selectedNode = node;
@@ -1601,6 +2032,9 @@
             activeDrag = null;
             isDragging = false;
             setTimeout(() => { nodeInteractionInProgress = false; }, 0);
+            
+            // Save graph after moving node
+            saveGraph();
         }
         
         class Wire {
@@ -2022,8 +2456,332 @@
             }
         }
         
+        // Graph persistence functions
+        function saveGraph() {
+            const graphData = {
+                // Core graph data
+                nodes: nodes.map(node => ({
+                    id: node.id,
+                    type: node.type,
+                    x: node.container.x,
+                    y: node.container.y,
+                    parameters: { ...node.parameters }
+                })),
+                wires: wires.map(wire => ({
+                    startNodeId: wire.startPort.node.id,
+                    startPortIndex: wire.startPort.portIndex,
+                    startPortType: wire.startPort.portType,
+                    endNodeId: wire.endPort.node.id,
+                    endPortIndex: wire.endPort.portIndex,
+                    endPortType: wire.endPort.portType
+                })),
+                nodeIdCounter: nodeIdCounter,
+                
+                // Camera state
+                camera: {
+                    x: camera.x,
+                    y: camera.y,
+                    zoom: camera.zoom,
+                    targetX: camera.targetX,
+                    targetY: camera.targetY,
+                    targetZoom: camera.targetZoom
+                },
+                
+                // UI settings
+                ui: {
+                    // Theme
+                    theme: document.body.classList.contains('ui-theme-light') ? 'light' : 'dark',
+                    
+                    // Color settings
+                    colors: {
+                        categoryColors: { ...window.categoryColors },
+                        saturationLevel: window.saturationLevel,
+                        hoverColor: window.hoverColor,
+                        selectedColor: window.selectedColor,
+                        currentPalette: document.getElementById('paletteSelector')?.value || 'material'
+                    },
+                    
+                    // Physics settings
+                    physics: { ...wirePhysics },
+                    
+                    // Node configuration
+                    nodeConfig: { ...nodeConfig }
+                }
+            };
+            
+            localStorage.setItem('nodeGraphData', JSON.stringify(graphData));
+            console.log('💾 Complete UI state saved to localStorage');
+            
+            // Show save indicator
+            showSaveIndicator();
+        }
+        
+        function loadGraph() {
+            const savedData = localStorage.getItem('nodeGraphData');
+            if (!savedData) {
+                console.log('📂 No saved graph found, starting fresh');
+                return false;
+            }
+            
+            try {
+                const graphData = JSON.parse(savedData);
+                console.log('📂 Loading saved graph:', graphData);
+                
+                // Clear existing nodes and wires
+                nodes.forEach(node => {
+                    if (node.container.parent) {
+                        node.container.parent.removeChild(node.container);
+                    }
+                });
+                wires.forEach(wire => {
+                    if (wire.graphics.parent) {
+                        wire.graphics.parent.removeChild(wire.graphics);
+                    }
+                    if (wire.glowGraphics && wire.glowGraphics.parent) {
+                        wire.glowGraphics.parent.removeChild(wire.glowGraphics);
+                    }
+                });
+                nodes.length = 0;
+                wires.length = 0;
+                
+                // Restore node ID counter
+                nodeIdCounter = graphData.nodeIdCounter || 0;
+                
+                // Restore camera state
+                if (graphData.camera) {
+                    camera.x = graphData.camera.x || 0;
+                    camera.y = graphData.camera.y || 0;
+                    camera.zoom = graphData.camera.zoom || 1;
+                    camera.targetX = graphData.camera.targetX || 0;
+                    camera.targetY = graphData.camera.targetY || 0;
+                    camera.targetZoom = graphData.camera.targetZoom || 1;
+                    console.log('📷 Camera state restored:', camera);
+                }
+                
+                // Restore UI settings
+                if (graphData.ui) {
+                    // Restore theme
+                    if (graphData.ui.theme) {
+                        const isLight = graphData.ui.theme === 'light';
+                        const body = document.body;
+                        const themeToggle = document.getElementById('themeToggle');
+                        const themeIcon = themeToggle?.querySelector('.theme-icon');
+                        const themeText = themeToggle?.querySelector('.theme-text');
+                        
+                        if (isLight) {
+                            body.classList.remove('ui-theme-dark');
+                            body.classList.add('ui-theme-light');
+                            if (themeIcon) themeIcon.textContent = '☀️';
+                            if (themeText) themeText.textContent = 'Light';
+                        } else {
+                            body.classList.remove('ui-theme-light');
+                            body.classList.add('ui-theme-dark');
+                            if (themeIcon) themeIcon.textContent = '🌙';
+                            if (themeText) themeText.textContent = 'Dark';
+                        }
+                        console.log('🎨 Theme restored:', graphData.ui.theme);
+                    }
+                    
+                    // Restore color settings
+                    if (graphData.ui.colors) {
+                        if (graphData.ui.colors.categoryColors) {
+                            window.categoryColors = { ...graphData.ui.colors.categoryColors };
+                        }
+                        if (graphData.ui.colors.saturationLevel !== undefined) {
+                            window.saturationLevel = graphData.ui.colors.saturationLevel;
+                            const satSlider = document.getElementById('saturationSlider');
+                            const satValue = document.getElementById('saturationValue');
+                            if (satSlider) satSlider.value = window.saturationLevel;
+                            if (satValue) satValue.textContent = window.saturationLevel + '%';
+                        }
+                        if (graphData.ui.colors.hoverColor !== undefined) {
+                            window.hoverColor = graphData.ui.colors.hoverColor;
+                            const hoverPicker = document.getElementById('colorHover');
+                            if (hoverPicker) hoverPicker.value = '#' + window.hoverColor.toString(16).padStart(6, '0');
+                        }
+                        if (graphData.ui.colors.selectedColor !== undefined) {
+                            window.selectedColor = graphData.ui.colors.selectedColor;
+                            const selectedPicker = document.getElementById('colorSelected');
+                            if (selectedPicker) selectedPicker.value = '#' + window.selectedColor.toString(16).padStart(6, '0');
+                        }
+                        if (graphData.ui.colors.currentPalette) {
+                            const paletteSelector = document.getElementById('paletteSelector');
+                            if (paletteSelector) paletteSelector.value = graphData.ui.colors.currentPalette;
+                        }
+                        
+                        // Update color pickers for categories
+                        Object.keys(window.categoryColors).forEach(category => {
+                            const colorPicker = document.getElementById(`color${category}`);
+                            if (colorPicker) {
+                                colorPicker.value = window.categoryColors[category];
+                            }
+                        });
+                        
+                        console.log('🎨 Color settings restored');
+                    }
+                    
+                    // Restore physics settings
+                    if (graphData.ui.physics) {
+                        Object.assign(wirePhysics, graphData.ui.physics);
+                        
+                        // Update physics sliders
+                        const physicsControls = [
+                            { id: 'minStiffnessSlider', valueId: 'minStiffnessValue', prop: 'minStiffness' },
+                            { id: 'maxStiffnessSlider', valueId: 'maxStiffnessValue', prop: 'maxStiffness' },
+                            { id: 'stiffnessBiasSlider', valueId: 'stiffnessBiasValue', prop: 'stiffnessBias' },
+                            { id: 'dampingSlider', valueId: 'dampingValue', prop: 'damping' },
+                            { id: 'gravitySlider', valueId: 'gravityValue', prop: 'gravity' },
+                            { id: 'sagSlider', valueId: 'sagValue', prop: 'sag' },
+                            { id: 'collisionStrengthSlider', valueId: 'collisionStrengthValue', prop: 'collisionStrength' },
+                            { id: 'collisionPaddingSlider', valueId: 'collisionPaddingValue', prop: 'collisionPadding' },
+                            { id: 'portStiffnessSlider', valueId: 'portStiffnessValue', prop: 'portStiffness' },
+                            { id: 'wirePointsSlider', valueId: 'wirePointsValue', prop: 'wirePoints' }
+                        ];
+                        
+                        physicsControls.forEach(({ id, valueId, prop }) => {
+                            const slider = document.getElementById(id);
+                            const valueDisplay = document.getElementById(valueId);
+                            if (slider && wirePhysics[prop] !== undefined) {
+                                slider.value = wirePhysics[prop];
+                                if (valueDisplay) valueDisplay.textContent = wirePhysics[prop];
+                            }
+                        });
+                        
+                        console.log('⚙️ Physics settings restored');
+                    }
+                    
+                    // Restore node configuration
+                    if (graphData.ui.nodeConfig) {
+                        Object.assign(nodeConfig, graphData.ui.nodeConfig);
+                        console.log('🔧 Node configuration restored');
+                    }
+                }
+                
+                // Create nodes
+                const nodeMap = new Map(); // Map ID to node for wire creation
+                graphData.nodes.forEach(nodeData => {
+                    const node = new Node(nodeData.type, nodeData.x, nodeData.y, textures, nodeData.id);
+                    
+                    // Restore parameters
+                    if (nodeData.parameters) {
+                        Object.assign(node.parameters, nodeData.parameters);
+                    }
+                    
+                    // Update texture and visuals
+                    node.updateNodeTexture();
+                    if (node.parameterSystem) {
+                        node.parameterSystem.updateParameterVisuals();
+                    }
+                    
+                    nodeMap.set(nodeData.id, node);
+                });
+                
+                // Create wires after all nodes are loaded
+                setTimeout(() => {
+                    graphData.wires.forEach(wireData => {
+                        const startNode = nodeMap.get(wireData.startNodeId);
+                        const endNode = nodeMap.get(wireData.endNodeId);
+                        
+                        if (startNode && endNode) {
+                            let startPort, endPort;
+                            
+                            if (wireData.startPortType === 'output') {
+                                startPort = startNode.outputs[wireData.startPortIndex];
+                            } else {
+                                startPort = startNode.inputs[wireData.startPortIndex];
+                            }
+                            
+                            if (wireData.endPortType === 'input') {
+                                endPort = endNode.inputs[wireData.endPortIndex];
+                            } else {
+                                endPort = endNode.outputs[wireData.endPortIndex];
+                            }
+                            
+                            if (startPort && endPort) {
+                                createWire(startPort, endPort, false); // false = don't save after loading
+                            }
+                        }
+                    });
+                    
+                    // Apply colors after loading
+                    updateNodeCategoryColors();
+                    updateInteractionColors();
+                    
+                    console.log('✅ Graph loaded successfully');
+                }, 50); // Small delay to ensure all nodes are fully initialized
+                
+                return true;
+            } catch (error) {
+                console.error('❌ Failed to load graph:', error);
+                return false;
+            }
+        }
+        
+        function clearGraph() {
+            // Clear existing nodes and wires
+            nodes.forEach(node => {
+                if (node.container.parent) {
+                    node.container.parent.removeChild(node.container);
+                }
+            });
+            wires.forEach(wire => {
+                if (wire.graphics.parent) {
+                    wire.graphics.parent.removeChild(wire.graphics);
+                }
+                if (wire.glowGraphics && wire.glowGraphics.parent) {
+                    wire.glowGraphics.parent.removeChild(wire.glowGraphics);
+                }
+            });
+            nodes.length = 0;
+            wires.length = 0;
+            
+            // Reset selected node
+            selectedNode = null;
+            
+            // Reset node ID counter
+            nodeIdCounter = 0;
+            
+            // Clear from localStorage
+            localStorage.removeItem('nodeGraphData');
+            
+            console.log('🗑️ Graph cleared');
+        }
+        
+        function showSaveIndicator() {
+            // Create save indicator if it doesn't exist
+            let indicator = document.getElementById('saveIndicator');
+            if (!indicator) {
+                indicator = document.createElement('div');
+                indicator.id = 'saveIndicator';
+                indicator.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 120px;
+                    background: rgba(0, 200, 0, 0.9);
+                    color: white;
+                    padding: 8px 16px;
+                    border-radius: 4px;
+                    font-family: 'JetBrains Mono', monospace;
+                    font-size: 12px;
+                    font-weight: 500;
+                    z-index: 10000;
+                    opacity: 0;
+                    transition: opacity 0.2s ease;
+                    pointer-events: none;
+                `;
+                indicator.textContent = '💾 UI + Graph Saved';
+                document.body.appendChild(indicator);
+            }
+            
+            // Show and hide with animation
+            indicator.style.opacity = '1';
+            setTimeout(() => {
+                indicator.style.opacity = '0';
+            }, 1500);
+        }
+        
         // Create wire between ports
-        function createWire(startPort, endPort) {
+        function createWire(startPort, endPort, shouldSave = true) {
             // Check if input port already has a connection
             if (endPort.portType === 'input' && endPort.connected) {
                 // Find and remove existing wire
@@ -2053,6 +2811,11 @@
             
             // Update the target node's texture since it has a new input
             endPort.node.updateNodeTexture();
+            
+            // Save graph after creating wire
+            if (shouldSave) {
+                saveGraph();
+            }
         }
         
         // Remove wire
@@ -2085,6 +2848,9 @@
             if (index > -1) {
                 wires.splice(index, 1);
             }
+            
+            // Save graph after removing wire
+            saveGraph();
         }
         
         // Temporary wire while dragging
@@ -2310,7 +3076,47 @@
             );
         }
         
-        // Context menu
+        // Category Menu System
+        function showCategoryMenu(x, y) {
+            const menu = document.getElementById('nodeCategoryMenu');
+            menu.style.left = (x + 10) + 'px';
+            menu.style.top = (y - 100) + 'px';
+            menu.classList.add('active');
+            
+            // Set up click handlers for node words
+            const nodeWords = menu.querySelectorAll('.node-word');
+            nodeWords.forEach(nodeWord => {
+                nodeWord.onclick = () => {
+                    const nodeType = nodeWord.dataset.name;
+                    console.log('Creating node type:', nodeType, 'textures:', textures);
+                    const worldX = (x - app.screen.width / 2) / camera.zoom + camera.x;
+                    const worldY = (y - app.screen.height / 2) / camera.zoom + camera.y;
+
+                    if (selectedNode) {
+                        selectedNode.setSelected(false);
+                    }
+
+                    try {
+                        const newNode = new Node(nodeType, worldX, worldY, textures);
+                        newNode.setSelected(true);
+                        selectedNode = newNode;
+                        
+                        // Save graph after creating node
+                        saveGraph();
+                    } catch (error) {
+                        console.error('Error creating node:', nodeType, error);
+                    }
+
+                    hideCategoryMenu();
+                };
+            });
+        }
+        
+        function hideCategoryMenu() {
+            document.getElementById('nodeCategoryMenu').classList.remove('active');
+        }
+        
+        // Legacy context menu (kept for compatibility)
         function showContextMenu(x, y) {
             const menu = document.getElementById('contextMenu');
             menu.style.left = x + 'px';
@@ -2336,13 +3142,16 @@
                         selectedNode.setSelected(false);
                     }
 
-                                                try {
-                    const newNode = new Node(type, worldX, worldY, textures);
-                    newNode.setSelected(true);
-                    selectedNode = newNode;
-                            } catch (error) {
-                                console.error('Error creating node:', type, error);
-                            }
+                    try {
+                        const newNode = new Node(type, worldX, worldY, textures);
+                        newNode.setSelected(true);
+                        selectedNode = newNode;
+                        
+                        // Save graph after creating node
+                        saveGraph();
+                    } catch (error) {
+                        console.error('Error creating node:', type, error);
+                    }
 
                     hideContextMenu();
                 };
@@ -2358,7 +3167,7 @@
         // Mouse/touch events
         app.view.addEventListener('contextmenu', (e) => {
             e.preventDefault();
-            showContextMenu(e.clientX, e.clientY);
+            showCategoryMenu(e.clientX, e.clientY);
         });
         
         app.view.addEventListener('mousedown', (e) => {
@@ -2369,6 +3178,10 @@
             // A click on the menu shouldn't hide it immediately
             if (!e.target.closest || !e.target.closest('.context-menu')) {
                 hideContextMenu();
+            }
+            // Close category menu when clicking outside
+            if (!e.target.closest || !e.target.closest('.node-category-menu')) {
+                hideCategoryMenu();
             }
         });
         
@@ -2402,6 +3215,12 @@
             if (isPanning) {
                 camera.targetX -= e.movementX / camera.zoom;
                 camera.targetY -= e.movementY / camera.zoom;
+                
+                // Debounced save for camera movement
+                clearTimeout(window.cameraSaveTimeout);
+                window.cameraSaveTimeout = setTimeout(() => {
+                    saveGraph();
+                }, 500); // Save 500ms after user stops panning
             }
             
             if (tempWire && connectionStart) {
@@ -2420,6 +3239,12 @@
             
             camera.targetX = worldX - (worldX - camera.targetX) * scaleFactor;
             camera.targetY = worldY - (worldY - camera.targetY) * scaleFactor;
+            
+            // Debounced save for zoom changes
+            clearTimeout(window.zoomSaveTimeout);
+            window.zoomSaveTimeout = setTimeout(() => {
+                saveGraph();
+            }, 300); // Save 300ms after user stops zooming
         });
         
         // Click on empty space to deselect
@@ -2428,12 +3253,33 @@
             if (e.target.closest && e.target.closest('.context-menu')) {
                 return;
             }
+            
+            // Don't deselect if clicking on category menu
+            if (e.target.closest && e.target.closest('.node-category-menu')) {
+                return;
+            }
 
-            if (!nodeInteractionInProgress && !parameterInteractionInProgress && e.target === app.view) {
+            // Check if we recently had a parameter interaction (additional safety)
+            const timeSinceLastParameterInteraction = window.lastParameterInteractionTime ? 
+                Date.now() - window.lastParameterInteractionTime : 1000;
+            const recentParameterInteraction = timeSinceLastParameterInteraction < 500; // 500ms buffer
+            
+            // Only deselect if not in the middle of interactions and clicking on the canvas itself
+            if (!nodeInteractionInProgress && !parameterInteractionInProgress && !recentParameterInteraction &&
+                (e.target === app.view || e.target.tagName === 'CANVAS')) {
+                // Hide ALL parameter panels from ALL nodes
+                console.log('Canvas click: hiding all parameter panels');
+                nodes.forEach(node => {
+                    if (node.parameterSystem) {
+                        node.parameterSystem.hideParameterPanel();
+                    }
+                });
+                
                 // Deselect node
                 if (selectedNode) {
-                selectedNode.setSelected(false);
-                selectedNode = null;
+                    console.log('Deselecting node via canvas click:', selectedNode.type);
+                    selectedNode.setSelected(false);
+                    selectedNode = null;
                 }
                 
                 // Deselect any selected wires
@@ -2447,6 +3293,14 @@
                         wire.draw();
                     }
                 });
+            } else {
+                // Log why deselection was blocked
+                if (nodeInteractionInProgress) console.log('Canvas click blocked: nodeInteractionInProgress');
+                if (parameterInteractionInProgress) console.log('Canvas click blocked: parameterInteractionInProgress');
+                if (recentParameterInteraction) console.log('Canvas click blocked: recent parameter interaction (' + timeSinceLastParameterInteraction + 'ms ago)');
+                if (e.target !== app.view && e.target.tagName !== 'CANVAS') {
+                    console.log('Canvas click blocked: target is not canvas:', e.target);
+                }
             }
         });
         
@@ -2517,6 +3371,33 @@
                     removeWire(wire);
                 });
             }
+            
+            // Close category menu with Escape
+            if (e.key === 'Escape') {
+                hideCategoryMenu();
+                hideContextMenu();
+                
+                // Hide ALL parameter panels from ALL nodes
+                console.log('Escape pressed: hiding all parameter panels');
+                nodes.forEach(node => {
+                    if (node.parameterSystem) {
+                        node.parameterSystem.hideParameterPanel();
+                    }
+                });
+                
+                // Deselect current node
+                if (selectedNode) {
+                    selectedNode.setSelected(false);
+                    selectedNode = null;
+                }
+            }
+            
+            // Clear graph with Ctrl+Shift+N
+            if (e.key.toLowerCase() === 'n' && e.ctrlKey && e.shiftKey) {
+                if (confirm('Clear current graph and start fresh? This will delete all nodes and connections.')) {
+                    clearGraph();
+                }
+            }
         });
         
         // Physics slider event handlers
@@ -2542,10 +3423,32 @@
                     const value = parseFloat(e.target.value);
                     wirePhysics[prop] = value;
                     valueDisplay.textContent = value;
+                    
+                    // Debounced save for physics changes
+                    clearTimeout(window.physicsSaveTimeout);
+                    window.physicsSaveTimeout = setTimeout(() => {
+                        saveGraph();
+                    }, 500); // Save 500ms after user stops adjusting
                 });
             });
         }
 
+        // Safety mechanism to reset stuck interaction flags
+        setInterval(() => {
+            // If parameter interaction has been stuck for more than 5 seconds, reset it
+            if (window.parameterInteractionInProgress) {
+                if (!window.lastParameterInteractionTime) {
+                    window.lastParameterInteractionTime = Date.now();
+                } else if (Date.now() - window.lastParameterInteractionTime > 5000) {
+                    console.warn('Resetting stuck parameterInteractionInProgress flag');
+                    window.parameterInteractionInProgress = false;
+                    window.lastParameterInteractionTime = null;
+                }
+            } else {
+                window.lastParameterInteractionTime = null;
+            }
+        }, 1000); // Check every second
+        
         // Initialize WebGPU
         async function initializeWebGPU() {
             const success = await webGPURenderer.initialize();
@@ -2589,41 +3492,12 @@
             }
         }
 
-        // Setup collapsible physics panel
-        function setupCollapsiblePhysics() {
-            const physicsToggle = document.getElementById('physicsToggle');
-            const physicsHeader = document.querySelector('.physics-header');
-            const controlsContainer = document.getElementById('physicsControlsContainer');
-            let isCollapsed = false;
-            
-            function togglePhysics() {
-                isCollapsed = !isCollapsed;
-                if (isCollapsed) {
-                    controlsContainer.classList.add('collapsed');
-                    physicsToggle.textContent = '▶';
-                    physicsToggle.style.transform = 'rotate(0deg)';
-                } else {
-                    controlsContainer.classList.remove('collapsed');
-                    physicsToggle.textContent = '▼';
-                    physicsToggle.style.transform = 'rotate(0deg)';
-                }
-            }
-            
-            physicsToggle.addEventListener('click', togglePhysics);
-            physicsHeader.addEventListener('click', (e) => {
-                if (e.target !== physicsToggle) {
-                    togglePhysics();
-                }
-            });
-        }
 
-        // Setup collapsible color palette panel
+
+        // Setup color palette panel
         function setupColorPalette() {
-            const colorToggle = document.getElementById('colorToggle');
-            const colorHeader = document.querySelector('.color-header');
             const controlsContainer = document.getElementById('colorControlsContainer');
             const resetButton = document.getElementById('colorReset');
-            let isCollapsed = false;
             let selectedColor = null;
             
             // Color palettes (HSV format: [Hue(0-360), Saturation(0-100), Value(0-100)])
@@ -2770,6 +3644,12 @@
                 localStorage.setItem('nodeSaturation', value);
                 updateNodeCategoryColors();
                 updateInteractionColors();
+                
+                // Save complete UI state
+                clearTimeout(window.colorSaveTimeout);
+                window.colorSaveTimeout = setTimeout(() => {
+                    saveGraph();
+                }, 300);
             });
             
 
@@ -2789,6 +3669,9 @@
                 // Auto-save hover color
                 localStorage.setItem('nodeHoverColor', window.hoverColor);
                 updateInteractionColors();
+                
+                // Save complete UI state
+                saveGraph();
             });
             
             selectedColorPicker.addEventListener('change', (e) => {
@@ -2796,6 +3679,9 @@
                 // Auto-save selected color
                 localStorage.setItem('nodeSelectedColor', window.selectedColor);
                 updateInteractionColors();
+                
+                // Save complete UI state
+                saveGraph();
             });
             
             // Setup palette selector
@@ -2806,6 +3692,9 @@
                 // Save to localStorage
                 localStorage.setItem('nodePalette', selectedPalette);
                 applyPalette(selectedPalette);
+                
+                // Save complete UI state
+                saveGraph();
             });
             
             // Function to apply a palette
@@ -2843,6 +3732,12 @@
                         // Auto-save custom colors to localStorage
                         localStorage.setItem(`nodeColor_${category}`, e.target.value);
                         updateNodeCategoryColors();
+                        
+                        // Save complete UI state
+                        clearTimeout(window.colorSaveTimeout);
+                        window.colorSaveTimeout = setTimeout(() => {
+                            saveGraph();
+                        }, 300);
                     });
                 }
             });
@@ -2878,25 +3773,12 @@
                 // Reset to current palette colors
                 applyPalette(currentPalette);
                 updateInteractionColors();
+                
+                // Save the reset UI state
+                saveGraph();
             });
             
-            function toggleColors() {
-                isCollapsed = !isCollapsed;
-                if (isCollapsed) {
-                    controlsContainer.classList.add('collapsed');
-                    colorToggle.textContent = '▶';
-                } else {
-                    controlsContainer.classList.remove('collapsed');
-                    colorToggle.textContent = '▼';
-                }
-            }
-            
-            colorToggle.addEventListener('click', toggleColors);
-            colorHeader.addEventListener('click', (e) => {
-                if (e.target !== colorToggle) {
-                    toggleColors();
-                }
-            });
+
         }
         
         // Apply global tint to all nodes
@@ -3068,7 +3950,7 @@
         // Initialize
         drawGrid();
         setupPhysicsControls();
-        setupCollapsiblePhysics();
+
         setupColorPalette();
         setupPreviewWindowInteractions();
         initializeWebGPU();

@@ -167,78 +167,90 @@
         .toolbar-item.un { background: #9C27B0; }
         .toolbar-item.dn { background: #F44336; }
         
-        /* Right-Click Marking Menu */
-        .right-click-menu {
+        /* Node Category Menu */
+        .node-category-menu {
             position: fixed;
-            width: 300px;
-            height: 300px;
-            background: #2a2a2a;
-            border: 2px solid #666;
+            background: rgba(42, 42, 42, 0.95);
+            border: 1px solid #555;
             border-radius: 0px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
             display: none;
             z-index: 2000;
             pointer-events: none;
+            backdrop-filter: blur(4px);
+            padding: 12px;
         }
         
-        .right-click-menu.active {
+        .node-category-menu.active {
             display: block;
             pointer-events: all;
         }
         
-        .marking-center {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 60px;
-            height: 60px;
-            background: #333;
-            border: 3px solid #888;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            color: #ccc;
-            font-weight: bold;
+        .category-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            width: 300px;
         }
         
-        .marking-item {
-            position: absolute;
-            width: 80px;
-            height: 80px;
-            border: 2px solid #666;
+        .category-rectangle {
+            background: rgba(51, 51, 51, 0.8);
+            border: 1px solid #666;
             border-radius: 0px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            color: #fff;
+            padding: 12px;
             cursor: pointer;
             transition: all 0.15s ease;
-            font-weight: bold;
-            text-align: center;
-            line-height: 1.2;
+            position: relative;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
         
-        .marking-item:hover {
-            transform: scale(1.15);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
-            border-color: #fff;
+        .category-rectangle:hover {
+            background: rgba(68, 68, 68, 0.9);
+            border-color: #888;
+            transform: scale(1.02);
         }
         
-        .marking-item.selected {
-            transform: scale(1.2);
+        .category-rectangle.selected {
+            background: rgba(0, 255, 255, 0.3);
             border-color: #00ffff;
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
         }
         
-        .marking-item.gn { background: #4CAF50; }
-        .marking-item.cn { background: #2196F3; }
-        .marking-item.mn { background: #FF9800; }
-        .marking-item.un { background: #9C27B0; }
-        .marking-item.dn { background: #F44336; }
+        .category-title {
+            font-size: 11px;
+            font-weight: bold;
+            color: #fff;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+        
+        .category-nodes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            justify-content: center;
+        }
+        
+        .node-word {
+            background: rgba(34, 34, 34, 0.8);
+            border: 1px solid #555;
+            border-radius: 0px;
+            padding: 3px 6px;
+            font-size: 8px;
+            color: #ccc;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-align: center;
+        }
+        
+        .node-word:hover {
+            background: rgba(0, 255, 255, 0.2);
+            border-color: #00ffff;
+            color: #fff;
+        }
         
         /* Marking Menu Labels */
         .marking-label {
@@ -686,14 +698,69 @@
         <div class="radial-item dn" style="top: 35%; left: 35%; transform: translate(-50%, -50%);" title="Deform">DN</div>
     </div>
     
-    <!-- Right-Click Marking Menu -->
-    <div class="right-click-menu" id="rightClickMenu">
-        <div class="marking-center">+</div>
-        <div class="marking-item gn" style="top: 30px; left: 50%; transform: translateX(-50%);" data-category="GN" data-name="Noise">Noise</div>
-        <div class="marking-item cn" style="top: 50%; right: 30px; transform: translateY(-50%);" data-category="CN" data-name="Color">Color</div>
-        <div class="marking-item mn" style="bottom: 30px; left: 50%; transform: translateX(-50%);" data-category="MN" data-name="Add">Add</div>
-        <div class="marking-item un" style="top: 50%; left: 30px; transform: translateY(-50%);" data-category="UN" data-name="Blend">Blend</div>
-        <div class="marking-item dn" style="top: 25%; left: 25%; transform: translate(-50%, -50%);" data-category="DN" data-name="Warp">Warp</div>
+    <!-- Node Category Menu -->
+    <div class="node-category-menu" id="nodeCategoryMenu">
+        <div class="category-grid">
+            <div class="category-rectangle" data-category="GN">
+                <div class="category-title">Generators</div>
+                <div class="category-nodes">
+                    <div class="node-word" data-name="Noise">Noise</div>
+                    <div class="node-word" data-name="Checker">Checker</div>
+                    <div class="node-word" data-name="Gradient">Gradient</div>
+                    <div class="node-word" data-name="Voronoi">Voronoi</div>
+                </div>
+            </div>
+            
+            <div class="category-rectangle" data-category="CN">
+                <div class="category-title">Constants</div>
+                <div class="category-nodes">
+                    <div class="node-word" data-name="Color">Color</div>
+                    <div class="node-word" data-name="Uniform">Uniform</div>
+                    <div class="node-word" data-name="Value">Value</div>
+                    <div class="node-word" data-name="Vector">Vector</div>
+                </div>
+            </div>
+            
+            <div class="category-rectangle" data-category="MN">
+                <div class="category-title">Math</div>
+                <div class="category-nodes">
+                    <div class="node-word" data-name="Add">Add</div>
+                    <div class="node-word" data-name="Multiply">Multiply</div>
+                    <div class="node-word" data-name="Subtract">Subtract</div>
+                    <div class="node-word" data-name="Divide">Divide</div>
+                </div>
+            </div>
+            
+            <div class="category-rectangle" data-category="UN">
+                <div class="category-title">Utility</div>
+                <div class="category-nodes">
+                    <div class="node-word" data-name="Blend">Blend</div>
+                    <div class="node-word" data-name="Mix">Mix</div>
+                    <div class="node-word" data-name="Clamp">Clamp</div>
+                    <div class="node-word" data-name="Map">Map</div>
+                </div>
+            </div>
+            
+            <div class="category-rectangle" data-category="DN">
+                <div class="category-title">Deform</div>
+                <div class="category-nodes">
+                    <div class="node-word" data-name="Warp">Warp</div>
+                    <div class="node-word" data-name="Distort">Distort</div>
+                    <div class="node-word" data-name="Twist">Twist</div>
+                    <div class="node-word" data-name="Bend">Bend</div>
+                </div>
+            </div>
+            
+            <div class="category-rectangle" data-category="FX">
+                <div class="category-title">Effects</div>
+                <div class="category-nodes">
+                    <div class="node-word" data-name="Blur">Blur</div>
+                    <div class="node-word" data-name="Sharpen">Sharpen</div>
+                    <div class="node-word" data-name="Emboss">Emboss</div>
+                    <div class="node-word" data-name="Noise">Noise</div>
+                </div>
+            </div>
+        </div>
     </div>
     
     <!-- Color Controls Panel -->
@@ -827,7 +894,7 @@
         </div>
         <div class="hotkey-item">
             <span class="hotkey-key">RMB</span>
-            <span>Marking Menu</span>
+            <span>Category Menu</span>
         </div>
     </div>
     
@@ -840,7 +907,7 @@
     <!-- Status Bar -->
     <div class="status-bar">
         <div class="status-left">
-            Ready - Right-click for marking menu, drag nodes to move
+            Ready - Right-click for category menu, click node words to create
         </div>
         <div class="status-right">
             <span>Zoom: 100%</span>
@@ -853,16 +920,12 @@
     <div class="tooltip" id="tooltip"></div>
     
     <script>
-        // Marking Menu System
-        class MarkingMenu {
+        // Node Category Menu System
+        class NodeCategoryMenu {
             constructor() {
-                this.menu = document.getElementById('rightClickMenu');
+                this.menu = document.getElementById('nodeCategoryMenu');
                 this.canvas = document.getElementById('canvasArea');
                 this.isActive = false;
-                this.startPos = { x: 0, y: 0 };
-                this.currentSelection = null;
-                this.dragThreshold = 10;
-                this.isDragging = false;
                 
                 this.setupEventListeners();
             }
@@ -874,17 +937,10 @@
                     this.openMenu(e.clientX, e.clientY);
                 });
                 
-                // Mouse move for selection
-                this.canvas.addEventListener('mousemove', (e) => {
-                    if (this.isActive) {
-                        this.handleMouseMove(e);
-                    }
-                });
-                
-                // Mouse up to select
-                this.canvas.addEventListener('mouseup', (e) => {
-                    if (this.isActive) {
-                        this.handleMouseUp(e);
+                // Click outside to close
+                document.addEventListener('click', (e) => {
+                    if (this.isActive && !this.menu.contains(e.target)) {
+                        this.closeMenu();
                     }
                 });
                 
@@ -895,9 +951,13 @@
                     }
                 });
                 
-                // Click outside to close
-                document.addEventListener('click', (e) => {
-                    if (this.isActive && !this.menu.contains(e.target)) {
+                // Node word click to create node
+                this.menu.addEventListener('click', (e) => {
+                    const nodeWord = e.target.closest('.node-word');
+                    if (nodeWord) {
+                        const category = nodeWord.closest('.category-rectangle').dataset.category;
+                        const name = nodeWord.dataset.name;
+                        this.createNode(category, name, e.clientX, e.clientY);
                         this.closeMenu();
                     }
                 });
@@ -905,106 +965,19 @@
             
             openMenu(x, y) {
                 this.isActive = true;
-                this.startPos = { x, y };
-                this.isDragging = false;
-                this.currentSelection = null;
                 
                 // Position menu at cursor
-                this.menu.style.left = (x - 150) + 'px';
-                this.menu.style.top = (y - 150) + 'px';
+                this.menu.style.left = (x + 10) + 'px';
+                this.menu.style.top = (y - 100) + 'px';
                 this.menu.classList.add('active');
                 
-                // Clear previous selections
-                document.querySelectorAll('.marking-item').forEach(item => {
-                    item.classList.remove('selected');
-                });
-                
-                console.log('Marking menu opened at:', x, y);
-            }
-            
-            handleMouseMove(e) {
-                if (!this.isActive) return;
-                
-                const deltaX = e.clientX - this.startPos.x;
-                const deltaY = e.clientY - this.startPos.y;
-                const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-                
-                // Check if we've started dragging
-                if (distance > this.dragThreshold && !this.isDragging) {
-                    this.isDragging = true;
-                    console.log('Started marking menu drag');
-                }
-                
-                if (this.isDragging) {
-                    this.updateSelection(e.clientX, e.clientY);
-                }
-            }
-            
-            updateSelection(x, y) {
-                const menuRect = this.menu.getBoundingClientRect();
-                const centerX = menuRect.left + menuRect.width / 2;
-                const centerY = menuRect.top + menuRect.height / 2;
-                
-                const deltaX = x - centerX;
-                const deltaY = y - centerY;
-                const angle = Math.atan2(deltaY, deltaX);
-                const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-                
-                // Clear previous selection
-                document.querySelectorAll('.marking-item').forEach(item => {
-                    item.classList.remove('selected');
-                });
-                
-                // Find which item is closest to the angle
-                const items = document.querySelectorAll('.marking-item');
-                let bestItem = null;
-                let bestAngle = Infinity;
-                
-                items.forEach(item => {
-                    const itemRect = item.getBoundingClientRect();
-                    const itemCenterX = itemRect.left + itemRect.width / 2;
-                    const itemCenterY = itemRect.top + itemRect.height / 2;
-                    
-                    const itemDeltaX = itemCenterX - centerX;
-                    const itemDeltaY = itemCenterY - centerY;
-                    const itemAngle = Math.atan2(itemDeltaY, itemDeltaX);
-                    
-                    const angleDiff = Math.abs(angle - itemAngle);
-                    const normalizedAngleDiff = Math.min(angleDiff, 2 * Math.PI - angleDiff);
-                    
-                    if (normalizedAngleDiff < bestAngle) {
-                        bestAngle = normalizedAngleDiff;
-                        bestItem = item;
-                    }
-                });
-                
-                // Select the best item if we're far enough from center
-                if (distance > 50 && bestItem) {
-                    bestItem.classList.add('selected');
-                    this.currentSelection = bestItem;
-                } else {
-                    this.currentSelection = null;
-                }
-            }
-            
-            handleMouseUp(e) {
-                if (!this.isActive) return;
-                
-                if (this.currentSelection) {
-                    const category = this.currentSelection.dataset.category;
-                    const name = this.currentSelection.dataset.name;
-                    this.createNode(category, name, e.clientX, e.clientY);
-                    console.log(`Created ${name} node (${category}) at:`, e.clientX, e.clientY);
-                }
-                
-                this.closeMenu();
+                console.log('Node category menu opened at:', x, y);
             }
             
             closeMenu() {
                 this.isActive = false;
                 this.menu.classList.remove('active');
-                this.currentSelection = null;
-                console.log('Marking menu closed');
+                console.log('Node category menu closed');
             }
             
             createNode(category, name, x, y) {
@@ -1022,6 +995,7 @@
                 this.makeNodeDraggable(node);
                 
                 this.canvas.appendChild(node);
+                console.log(`Created ${name} node (${category}) at:`, x, y);
             }
             
             makeNodeDraggable(node) {
@@ -1067,8 +1041,8 @@
             }
         }
         
-        // Initialize marking menu
-        const markingMenu = new MarkingMenu();
+        // Initialize node category menu
+        const nodeCategoryMenu = new NodeCategoryMenu();
         
         // Marking Menu Toggle (old radial menu)
         const markingMenuBtn = document.getElementById('markingMenuBtn');
@@ -1234,8 +1208,8 @@
         loadSettings();
         
         console.log('TexN Node Editor Loaded');
-        console.log('Features: Right-Click Marking Menus, Color Controls, Physics Panel, Auto-save, Draggable Nodes');
-        console.log('Right-click on canvas to open marking menu, drag to select, release to create node');
+        console.log('Features: Category Menu, Color Controls, Physics Panel, Auto-save, Draggable Nodes');
+        console.log('Right-click on canvas to open category menu, click node words to create');
     </script>
 </body>
 </html> 
